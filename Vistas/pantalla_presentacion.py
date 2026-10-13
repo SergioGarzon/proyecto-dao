@@ -1,5 +1,6 @@
 import tkinter as tk
 import platform
+import os
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
@@ -13,7 +14,7 @@ class PantallaInicioPrograma():
 
     def windows_properties(self):
         self.windows_main.title("Proyecto DAO")
-        self.windows_main.geometry("700x450+250+100")
+        self.windows_main.geometry("800x800+250+100")
         self.windows_main.configure(bg="white")
         self.windows_main.resizable(False, False)
     
@@ -54,15 +55,20 @@ class PantallaInicioPrograma():
                             
         btn_quit.config(fg="white", bg="blue", font=("Arial", 15, "bold"))  
         #btn_quit.config(command=self.quitar_ventana)  
-                       
-        image_open = Image.open("./logo_utn.png")
+           
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)
+        image_path = os.path.join(project_root, "Recursos", "logo_utn.png")
+
+        image_open = Image.open(image_path)
         image_open = ImageTk.PhotoImage(image_open)
-        
+                    
         image_label = tk.Label(frame1, image=image_open)
         image_label.image = image_open 
         
         frame1.pack()
-        label_name_subject.pack()
+        label_name_subject.pack()        
+        image_label.pack()         
         name_personas.pack()
         name_person_1.pack()
         name_person_2.pack()
@@ -71,6 +77,7 @@ class PantallaInicioPrograma():
         name_person_5.pack()
         name_person_6.pack()
         btn_quit.pack()
+
 
 
 if __name__ == "__main__":
