@@ -9,7 +9,7 @@ Se requiere un sistema que administre las operaciones habituales de la bibliotec
 ---
 1. Administrar las sedes de la red (dirección, datos de contacto, horarios y estado activo/baja). 
 2. Administrar socios. 
-3. Administrar catálogo de libros y ejemplares físicos,indicando la sede a la que pertenece cada ejemplar. 
+3. Administrar catálogo de libros y ejemplares físicos, indicando la sede a la que pertenece cada ejemplar. 
 4. Registrar solicitudes de préstamo local e interbibliotecario (indicando sede origen y sede destino). 
 5. Empaquetar, despachar y recibir ejemplares, asignando un remito y permitiendo la trazabilidad del mismo a lo largo del trayecto (estados). 
 6. Consultar disponibilidad. 

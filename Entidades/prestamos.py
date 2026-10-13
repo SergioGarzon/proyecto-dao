@@ -1,2 +1,2 @@
-class Prestamos:
+class Prestamo:
     pass
