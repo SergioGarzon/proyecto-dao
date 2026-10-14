@@ -14,7 +14,7 @@ class PantallaInicioPrograma():
 
     def windows_properties(self):
         self.windows_main.title("Proyecto DAO")
-        self.windows_main.geometry("800x800+250+100")
+        self.windows_main.geometry("600x650")
         self.windows_main.configure(bg="white")
         self.windows_main.resizable(False, False)
     
@@ -41,7 +41,7 @@ class PantallaInicioPrograma():
             name_person_4.config(fg="black", bg="white", font=("Arial", 15))  
             name_person_5.config(fg="black", bg="white", font=("Arial", 15))
             name_person_6.config(fg="black", bg="white", font=("Arial", 15)) 
-            btn_quit = tk.Button(self.windows_main, text="Continuar", cursor="Hand2")             
+            btn_continue = tk.Button(self.windows_main, text="Continuar", cursor="Hand2")             
         else:    
             label_name_subject.config(fg="black", bg="white")
             name_personas.config(fg="black", bg="white")
@@ -51,10 +51,10 @@ class PantallaInicioPrograma():
             name_person_4.config(fg="black", bg="white")  
             name_person_5.config(fg="black", bg="white")
             name_person_6.config(fg="black", bg="white")
-            btn_quit = tk.Button(self.windows_main, text="Continuar")
+            btn_continue = tk.Button(self.windows_main, text="Continuar")
                             
-        btn_quit.config(fg="white", bg="blue", font=("Arial", 15, "bold"))  
-        #btn_quit.config(command=self.quitar_ventana)  
+        btn_continue.config(fg="white", bg="blue", font=("Arial", 15, "bold"))  
+        btn_continue.config(command=self.pasar_siguiente_ventana)  
            
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(current_dir)
@@ -76,8 +76,10 @@ class PantallaInicioPrograma():
         name_person_4.pack()
         name_person_5.pack()
         name_person_6.pack()
-        btn_quit.pack()
+        btn_continue.pack()
 
+    def pasar_siguiente_ventana(self):
+        print("Hola mundo")
 
 
 if __name__ == "__main__":

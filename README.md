@@ -1,3 +1,27 @@
+# DATOS DEL PROYECTO
+
+!["Logo UTN FRC"](./Recursos/logo_utn.png)
+
+> **Materia:** Desarrollo de Aplicaciones con Objetos  
+
+> **Curso:** 4K1
+
+> **Integrantes:**  
+> * Dario Lopez    
+> * Federico Wedemeyer
+> * Rosario Evelyn Mendoza
+> * Sergio Gabriel Garzon
+> * Tomas Reyna Mariano
+
+---
+
+## Diagrama de clases propuesto por el grupo:
+
+!["Diagrama de clases"](./Recursos/diagrama%20de%20clases.drawio.png)
+
+---
+# Enunciado
+
 # Biblioteca: Sistema de Préstamos Interbibliotecarios 
 
 ### Contexto  
