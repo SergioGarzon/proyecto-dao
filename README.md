@@ -20,6 +20,22 @@
 !["Diagrama de clases"](./Recursos/diagrama%20de%20clases.drawio.png)
 
 ---
+
+# información
+
+#### ¿Como ejecutar el proyecto?
+
+Para ejecutar, en la terminal debemos poner el siguiente comando:
+
+```cmd
+python ./pantalla_principal.py
+```
+
+De esta forma, nos saldra la ventana de presentación:
+
+!["Ventana del proyecto"](./Recursos/Ventana%20proyecto.png)
+
+---
 # Enunciado
 
 # Biblioteca: Sistema de Préstamos Interbibliotecarios 

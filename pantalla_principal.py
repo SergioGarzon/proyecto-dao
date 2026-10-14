@@ -84,7 +84,6 @@ class PantallaPrincipal():
         self.windows_main.destroy()
         PantallaInicial()
 
-
 if __name__ == "__main__":
     app_inicial = PantallaPrincipal()
     app_inicial.windows_main.mainloop()
