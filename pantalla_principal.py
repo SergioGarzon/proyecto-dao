@@ -1,11 +1,12 @@
 import tkinter as tk
 import platform
 import os
+from Vistas.pantalla_inicial import PantallaInicial
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
 
-class PantallaInicioPrograma():
+class PantallaPrincipal():
 
     def __init__(self):
         self.windows_main = tk.Tk()
@@ -57,11 +58,12 @@ class PantallaInicioPrograma():
         btn_continue.config(command=self.pasar_siguiente_ventana)  
            
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(current_dir)
-        image_path = os.path.join(project_root, "Recursos", "logo_utn.png")
+        
+        image_path = os.path.join(current_dir, "Recursos", "logo_utn.png")
 
         image_open = Image.open(image_path)
         image_open = ImageTk.PhotoImage(image_open)
+
                     
         image_label = tk.Label(frame1, image=image_open)
         image_label.image = image_open 
@@ -79,9 +81,10 @@ class PantallaInicioPrograma():
         btn_continue.pack()
 
     def pasar_siguiente_ventana(self):
-        print("Hola mundo")
+        self.windows_main.destroy()
+        PantallaInicial()
 
 
 if __name__ == "__main__":
-    app_inicial = PantallaInicioPrograma()
+    app_inicial = PantallaPrincipal()
     app_inicial.windows_main.mainloop()
