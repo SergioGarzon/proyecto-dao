@@ -63,7 +63,6 @@ class PantallaPrincipal():
 
         image_open = Image.open(image_path)
         image_open = ImageTk.PhotoImage(image_open)
-
                     
         image_label = tk.Label(frame1, image=image_open)
         image_label.image = image_open 

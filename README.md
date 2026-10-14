@@ -43,7 +43,7 @@ De esta forma, nos saldra la ventana de presentación:
 ### Contexto  
 ---
 Una red de bibliotecas públicas administra cientos de socios y un amplio catálogo de libros y otros materiales de consulta. Actualmente muchas tareas se realizan en forma manual, lo que dificulta el control de préstamos, devoluciones y disponibilidad de ejemplares.  
-Se requiere un sistema que administre las operaciones habituales de la biblioteca, administre las sedes que conforman la red y facilite la consulta de información tanto al personal como alos usuarios, incluyendo el envío de ejemplares entre las distintas sedes de la red. 
+Se requiere un sistema que administre las operaciones habituales de la biblioteca, administre las sedes que conforman la red y facilite la consulta de información tanto al personal como a los usuarios, incluyendo el envío de ejemplares entre las distintas sedes de la red. 
 
 ### Procesos de negocio obligatorios   
 ---
