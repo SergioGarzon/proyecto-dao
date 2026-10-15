@@ -35,6 +35,13 @@ De esta forma, nos saldra la ventana de presentación:
 
 !["Ventana del proyecto"](./Recursos/Ventana%20proyecto.png)
 
+Si en caso, de que no funcione el proyecto, entonces debemos instalar la libreria de Pillow, para ello
+escribimos el siguiente comando en la terminal:
+
+```cmd
+pip install pillow
+```  
+
 ---
 # Enunciado
 
