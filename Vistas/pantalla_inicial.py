@@ -4,6 +4,7 @@ import os
 from tkinter import messagebox
 
 from Vistas.gestion_sede import PantallaGestionSede
+from Vistas.gestion_socio import PantallaGestionSocio
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
@@ -50,7 +51,7 @@ class PantallaInicial:
         btn_gestion_sedes.config(command=self.activar_ventana_gestion_sede)
         
         btn_gestion_socios.config(fg="white", bg="blue", font=("Arial", 15, "bold"))
-        btn_gestion_socios.config(command=self.mensaje_botones) 
+        btn_gestion_socios.config(command=self.activar_ventana_gestion_socios) 
         
         btn_gestion_libros.config(fg="white", bg="black", font=("Arial", 15, "bold"))
         btn_gestion_libros.config(command=self.mensaje_botones) 
@@ -94,6 +95,9 @@ class PantallaInicial:
         
     def activar_ventana_gestion_sede(self):
         PantallaGestionSede()
+    
+    def activar_ventana_gestion_socios(self):
+        PantallaGestionSocio()
         
     def salir_sistema(self):
         self.windows_inicial.destroy()
