@@ -1,3 +1,5 @@
+from estado_libro import EstadoLibro
+
 class Libro:
     
     # Esta parte en Python no es necesaria, pero si en la materia lo ponemos asi, lo dejamos entonces
@@ -6,55 +8,65 @@ class Libro:
     _autor = None
     _editorial = None
     _anio_publicacion = None
+    _estado_libro = None
     
-    def __init__(self, codigo_libro_dato, titulo_dato, autor_dato, editorial_dato, anio_publicacion_dato):
-        self._codigo_libro = codigo_libro_dato
-        self._titulo = titulo_dato
-        self._autor = autor_dato
-        self._editorial = editorial_dato
-        self._anio_publicacion = anio_publicacion_dato
-    
-    # Setters
-    @_codigo_libro.setter
-    def codigo_libro(self, codigo_libro_dato):
-        self._codigo_libro = codigo_libro_dato
-        
-    @_titulo.setter
-    def titulo(self, titulo_dato):
-        self._titulo = titulo_dato
-    
-    @_autor.setter
-    def autor(self, autor_dato):
-        self._autor = autor_dato
-        
-    @_editorial.setter
-    def editorial(self, editorial_dato):
-        self._editorial = editorial_dato
-        
-    @_anio_publicacion.setter
-    def anio_publicacion(self, anio_publicacion):
-        self._anio_publicacion = anio_publicacion
+    def __init__(self, nuevo_codigo, nuevo_titulo, nuevo_autor, nuevo_editorial, nuevo_anio_publicacion, nuevo_estado):
+        self._codigo_libro = nuevo_codigo
+        self._titulo = nuevo_titulo
+        self._autor = nuevo_autor
+        self._editorial = nuevo_editorial
+        self._anio_publicacion = nuevo_anio_publicacion
+        self._estado_libro = EstadoLibro(nuevo_estado)
     
     # Getters
     @property
-    def Codigo_libro(self):
+    def codigo_libro(self):
         return self._codigo_libro
-    
-    @property
-    def Titulo(self):
-        return self._titulo
-    
-    @property
-    def Autor(self):
-        return self._autor
         
     @property
-    def Editorial(self):
+    def titulo(self):
+        return self._titulo
+        
+    @property
+    def autor(self):
+        return self._autor
+            
+    @property
+    def editorial(self):
         return self._editorial
+        
+    @property
+    def anio_publicacion(self):
+        return self._anio_publicacion
     
     @property
-    def Anio_publicacion(self):
-        return self._anio_publicacion
+    def estado_libro(self):
+        return self._estado_libro   
+    
+    # Setters
+    @codigo_libro.setter
+    def codigo_libro(self, nuevo_codigo):
+        self._codigo_libro = nuevo_codigo
+        
+    @titulo.setter
+    def titulo(self, nuevo_titulo):
+        self._titulo = nuevo_titulo
+    
+    @autor.setter
+    def autor(self, nuevo_autor):
+        self._autor = nuevo_autor
+        
+    @editorial.setter
+    def editorial(self, nuevo_editorial):
+        self._editorial = nuevo_editorial
+        
+    @anio_publicacion.setter
+    def anio_publicacion(self, nuevo_anio_publicacion):
+        self._anio_publicacion = nuevo_anio_publicacion
+        
+    @estado_libro.setter
+    def estado_libro(self, nuevo_estado):
+        self._estado_libro = nuevo_estado
     
     # Metodo toString en Python, por las dudas lo pongo
     def __str__(self):
@@ -62,4 +74,5 @@ class Libro:
                 Titulo={self._titulo}, 
                 Autor={self._autor},
                 Editorial={self._editorial},
-                Año de publicacion={self._anio_publicacion})'''
+                Año de publicacion={self._anio_publicacion},
+                Estado libro= {self._estado_libro})'''
