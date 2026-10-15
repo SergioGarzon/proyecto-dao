@@ -4,7 +4,6 @@ class ConectionDAO:
     
     @staticmethod
     def crear_tablas():
-
         connection = None
         try:
             connection = sqlite3.connect("base_datos.db")
@@ -12,10 +11,14 @@ class ConectionDAO:
             
             query_tabla_socios = '''
                 CREATE TABLE IF NOT EXISTS socios (
-                    codigo INTEGER PRIMARY KEY,
+                    legajo_dni INTEGER PRIMARY KEY,
                     nombre TEXT,
                     apellido TEXT,
-                    fecha_nacimiento TEXT
+                    fecha_inscripcion TEXT,
+                    domicilio_calle TEXT,
+                    barrio TEXT,
+                    localidad TEXT,
+                    estado_socio TEXT
                 )
             '''
             cursor.execute(query_tabla_socios)
@@ -29,7 +32,7 @@ class ConectionDAO:
                 connection.close()
 
     @staticmethod
-    def conection_database_sqlite3(query_str):
+    def insertar_socios(query_str):
         connection = None
         try:
             connection = sqlite3.connect("base_datos.db")
@@ -37,13 +40,31 @@ class ConectionDAO:
     
             cursor.execute(query_str)
             connection.commit()
-    
-            print("Información insertada correctamente")
+            print("Operación de escritura exitosa")
     
         except sqlite3.Error as error:
             if connection:
                 connection.rollback()
-            print("Error", error)    
+            print("Error en escritura:", error)    
         finally:
             if connection:
                 connection.close()
+
+    @staticmethod
+    def obtener_socios(query_str):
+        connection = None
+        resultados = [] 
+        try:
+            connection = sqlite3.connect("base_datos.db")
+            cursor = connection.cursor()
+            
+            cursor.execute(query_str)
+            resultados = cursor.fetchall() # Esto esta en el documento es para traer los datos de la tabla
+            
+        except sqlite3.Error as error:
+            print("Error al consultar los socios:", error)
+        finally:
+            if connection:
+                connection.close()
+                
+        return resultados

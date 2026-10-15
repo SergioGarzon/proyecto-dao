@@ -6,6 +6,7 @@
 ./Vistas/__pycache__/
 ./Entidades/__pycache__/
 ./Persistencia/__pycache__/
+./Controlador/__pycache__/
 __pycache__/
 *.py[cod]
 *$py.class
