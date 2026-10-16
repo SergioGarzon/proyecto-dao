@@ -3,7 +3,7 @@ from tkinter import ttk
 import tkinter as tk
 import platform
 from Controlador.controlador_socio import ControladorSocio
-from Vistas.insercion_socios import InsercionSocios
+from Vistas.socios.insercion_socios import InsercionSocios
 
 class PantallaGestionSocio:
     

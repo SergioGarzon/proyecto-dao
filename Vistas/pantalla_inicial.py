@@ -3,8 +3,8 @@ import platform
 import os
 from tkinter import messagebox
 
-from Vistas.gestion_sede import PantallaGestionSede
-from Vistas.gestion_socio import PantallaGestionSocio
+from Vistas.sedes.gestion_sede import PantallaGestionSede
+from Vistas.socios.gestion_socio import PantallaGestionSocio
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
