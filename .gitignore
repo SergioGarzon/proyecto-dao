@@ -7,6 +7,9 @@ base_datos.db
 ### Python ###
 # Byte-compiled / optimized / DLL files
 ./Vistas/__pycache__/
+./Vistas/socios/__pycache__/
+./Vistas/sedes/__pycache__/
+./Vistas/prestamos/__pycache__/
 ./Entidades/__pycache__/
 ./Persistencia/__pycache__/
 ./Controlador/__pycache__/
