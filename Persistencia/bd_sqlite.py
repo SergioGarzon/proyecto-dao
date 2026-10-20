@@ -32,7 +32,7 @@ class ConectionDAO:
                 connection.close()
 
     @staticmethod
-    def insertar_socios(query_str):
+    def accion_socios(query_str):
         connection = None
         try:
             connection = sqlite3.connect("base_datos.db")

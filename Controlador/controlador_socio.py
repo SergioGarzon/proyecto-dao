@@ -10,4 +10,8 @@ class ControladorSocio:
         return resultados_lista
 
     def insertar_socios(self, query_sql):
-        ConectionDAO.insertar_socios(query_sql)
+        ConectionDAO.accion_socios(query_sql)
+    
+    def eliminar_socio(self, query_sql):
+        ConectionDAO.accion_socios(query_sql)
+            
