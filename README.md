@@ -42,6 +42,12 @@ escribimos el siguiente comando en la terminal:
 pip install pillow
 ```  
 
+Otra cosa, la base de datos cuyo nombre es "base_datos.db", se recomienda borrarla a menudo, para borrarla podemos poner este comando en la terminal
+
+```cmd
+rm ./base_datos.db
+```  
+
 ---
 # Enunciado
 

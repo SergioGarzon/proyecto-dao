@@ -101,3 +101,4 @@ class PantallaInicial:
         
     def salir_sistema(self):
         self.windows_inicial.destroy()
+        quit()

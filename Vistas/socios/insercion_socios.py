@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
+from tkinter import messagebox
 import platform
 from Controlador.controlador_socio import ControladorSocio
 
@@ -17,7 +18,7 @@ class InsercionSocios:
     
     def windows_properties(self):
         self.windows_insercion_socio.title("Proyecto DAO")
-        self.windows_insercion_socio.geometry("800x650")
+        self.windows_insercion_socio.geometry("800x550")
         self.windows_insercion_socio.configure(bg="lightyellow")
         self.windows_insercion_socio.resizable(False, False)
         
@@ -108,22 +109,36 @@ class InsercionSocios:
         domicilio = self.textbox_domicilio.get()
         barrio = self.textbox_barrio.get()
         localidad = self.textbox_localidad.get()
-
-
-        insert_sql = f'''
-            INSERT INTO socios(legajo_dni, nombre, apellido, fecha_inscripcion, domicilio_calle, barrio, localidad, estado_socio) 
-            VALUES({legajo}, '{nombre}', '{apellido}', '{fecha}', '{domicilio}', '{barrio}', '{localidad}', 'Activo')
-        '''
+        
+        if str(legajo) != "" and str(nombre) != "" and str(apellido) != "" and str(fecha) != "" and str(domicilio) != "" and str(barrio) != "" and str(localidad) != "":
             
-        self.controlador_socios.insertar_socios(insert_sql)
+            # Vamos a verificar si el socio ya existe, con ese legajo
+            
+            query_sql = f"SELECT * FROM socios WHERE legajo_dni = {legajo}"
+            
+            lista_devuelta = self.controlador_socios.consultar_socios(query_sql)
+            
+            if len(lista_devuelta) != 0:
+                messagebox.showwarning("Advertencia", "Ya existe un usuario con el legajo ingresado, no se puede cargar el mismo!")
+                return         
+            
+            insert_sql = f'''
+                INSERT INTO socios(legajo_dni, nombre, apellido, fecha_inscripcion, domicilio_calle, barrio, localidad, estado_socio) 
+                VALUES({legajo}, '{nombre}', '{apellido}', '{fecha}', '{domicilio}', '{barrio}', '{localidad}', 'Activo')
+                '''
+            
+            self.controlador_socios.insertar_socios(insert_sql)
+            
+            messagebox.showinfo("Información", "Socio insertado correctamente!")
         
-        self.textbox_legajo_socio.delete(0, tk.END)
-        self.textbox_nombre_socio.delete(0, tk.END)
-        self.textbox_apellido_socio.delete(0, tk.END)
-        self.textbox_fecha_inscripcion.delete(0, tk.END)
-        self.textbox_domicilio.delete(0, tk.END)
-        self.textbox_barrio.delete(0, tk.END)
-        self.textbox_localidad.delete(0, tk.END)
-        
+            self.textbox_legajo_socio.delete(0, tk.END)
+            self.textbox_nombre_socio.delete(0, tk.END)
+            self.textbox_apellido_socio.delete(0, tk.END)
+            self.textbox_fecha_inscripcion.delete(0, tk.END)
+            self.textbox_domicilio.delete(0, tk.END)
+            self.textbox_barrio.delete(0, tk.END)
+            self.textbox_localidad.delete(0, tk.END)
+        else:
+            messagebox.showerror("Error", "Faltan llenar datos! No se puede insertar ningun usuario")
     
     
