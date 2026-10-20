@@ -87,8 +87,7 @@ class PantallaInicial:
         btn_gestion_libros.pack(side="left")
         btn_gestion_prestamos.pack(side="right")
         btn_gestion_reservas.pack(side="left")
-        btn_gestion_devoluciones.pack(side="right")
-        
+        btn_gestion_devoluciones.pack(side="right")        
     
     def mensaje_botones(self):
         messagebox.showinfo("Información", "Todavia no funciona, en proceso :)")
@@ -100,5 +99,10 @@ class PantallaInicial:
         PantallaGestionSocio()
         
     def salir_sistema(self):
-        self.windows_inicial.destroy()
-        quit()
+        
+        value_confirm = str(messagebox.askquestion(message="Estas seguro que deseas salir del sistema?", title="Confirme"))
+        
+        if value_confirm == "yes":
+            self.windows_inicial.destroy()
+            quit()
+        
