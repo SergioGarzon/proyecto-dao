@@ -5,6 +5,7 @@ from tkinter import messagebox
 
 from Vistas.sedes.gestion_sede import PantallaGestionSede
 from Vistas.socios.gestion_socio import PantallaGestionSocio
+from Vistas.reportes.reportes_generales import PantallaReportesGenerales
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
@@ -18,7 +19,7 @@ class PantallaInicial:
     
     def windows_properties(self):
         self.windows_inicial.title("Proyecto DAO")
-        self.windows_inicial.geometry("1200x650")
+        self.windows_inicial.geometry("1200x750")
         self.windows_inicial.configure(bg="lightyellow")
         self.windows_inicial.resizable(False, False)
         
@@ -37,6 +38,7 @@ class PantallaInicial:
             btn_gestion_reservas = tk.Button(self.windows_inicial, text="Gestionar Reservas", cursor="Hand2")
             btn_gestion_devoluciones = tk.Button(self.windows_inicial, text="Gestionar Devoluciones", cursor="Hand2")
             btn_salir_sistema = tk.Button(self.windows_inicial, text="Salir del sistema", cursor="Hand2")
+            btn_reportes = tk.Button(self.windows_inicial, text="Reportes Generales", cursor="Hand2")
         else:    
             label_name_subject.config(fg="black", bg="lightyellow")  
             btn_gestion_sedes = tk.Button(self.windows_inicial, text="Gestionar Sedes")
@@ -46,6 +48,7 @@ class PantallaInicial:
             btn_gestion_reservas = tk.Button(self.windows_inicial, text="Gestionar Reservas")
             btn_gestion_devoluciones = tk.Button(self.windows_inicial, text="Gestionar Devoluciones")
             btn_salir_sistema = tk.Button(self.windows_inicial, text="Salir del sistema")
+            btn_reportes = tk.Button(self.windows_inicial, text="Reportes Generales")
                                         
         btn_gestion_sedes.config(fg="white", bg="gray", font=("Arial", 15, "bold"))  
         btn_gestion_sedes.config(command=self.activar_ventana_gestion_sede)
@@ -63,10 +66,13 @@ class PantallaInicial:
         btn_gestion_reservas.config(command=self.mensaje_botones) 
         
         btn_gestion_devoluciones.config(fg="white", bg="orange", font=("Arial", 15, "bold"))
-        btn_gestion_devoluciones.config(command=self.mensaje_botones)   
+        btn_gestion_devoluciones.config(command=self.mensaje_botones)          
         
         btn_salir_sistema.config(fg="white", bg="red", font=("Arial", 15, "bold"))
         btn_salir_sistema.config(command=self.salir_sistema)
+        
+        btn_reportes.config(fg="white", bg="violet", font=("Arial", 15, "bold"))
+        btn_reportes.config(command=self.activar_ventana_reportes)
                     
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(current_dir)
@@ -80,14 +86,15 @@ class PantallaInicial:
         
         frame_2.pack()
         label_name_subject.pack()
-        image_label.pack() 
+        image_label.pack()       
         btn_salir_sistema.pack()
+        btn_reportes.pack()
         btn_gestion_sedes.pack(side="left")
         btn_gestion_socios.pack(side="right")
         btn_gestion_libros.pack(side="left")
         btn_gestion_prestamos.pack(side="right")
         btn_gestion_reservas.pack(side="left")
-        btn_gestion_devoluciones.pack(side="right")        
+        btn_gestion_devoluciones.pack(side="right")     
     
     def mensaje_botones(self):
         messagebox.showinfo("Información", "Todavia no funciona, en proceso :)")
@@ -97,9 +104,12 @@ class PantallaInicial:
     
     def activar_ventana_gestion_socios(self):
         PantallaGestionSocio()
+    
+    def activar_ventana_reportes(self):
+        PantallaReportesGenerales()
         
-    def salir_sistema(self):
         
+    def salir_sistema(self):        
         value_confirm = str(messagebox.askquestion(message="Estas seguro que deseas salir del sistema?", title="Confirme"))
         
         if value_confirm == "yes":
