@@ -1,3 +1,5 @@
+# Para poder ejecutar hay que hacer estos pasos como esta en el documento del aula virtual
+
 # python --version
 # python -m venv .venv
 # Windows PowerShell:
