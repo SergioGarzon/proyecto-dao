@@ -2,10 +2,12 @@ import tkinter as tk
 import platform
 import os
 from tkinter import messagebox
+import flet as ft
 
 from Vistas.sedes.gestion_sede import PantallaGestionSede
 from Vistas.socios.gestion_socio import PantallaGestionSocio
 from Vistas.reportes.reportes_generales import PantallaReportesGenerales
+from Vistas.version.version_proyecto import main
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
@@ -114,5 +116,6 @@ class PantallaInicial:
         
         if value_confirm == "yes":
             self.windows_inicial.destroy()
-            quit()
+            #quit()
+            ft.run(main)
         
