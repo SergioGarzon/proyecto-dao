@@ -17,6 +17,9 @@ class Socio:
     _localidad = Column(String(20), nullable=False)
     _estado_socio = Column(String(20), nullable=False)
     
+    # Hay que ver bien esto
+    estados_socios = relationship('estados_socios', back_populates='socios')
+    
     def __init__(self, nuevo_legajo_dni, nuevo_nombre, nuevo_apellido, nueva_fecha_inscripcion, nuevo_domicilio, nuevo_barrio, nueva_localidad, nuevo_estado):
         self._legajo_dni = nuevo_legajo_dni
         self._nombre = nuevo_nombre
@@ -92,14 +95,14 @@ class Socio:
         self._estado_socio = nuevo_estado
         
     # Metodo toString en Python, por las dudas lo pongo
-        def __str__(self):
-            return f'''Socio(Código del socio={self._legajo_dni}, 
-                   nombre= {self._nombre},
-                   apellido= {self._apellido},
-                   fecha de inscripción= {self._fecha_inscripcion},
-                   domicilio calle= {self._domicilio_calle},
-                   barrio= {self._barrio},
-                   localidad= {self._localidad},
-                   estado= {self._estado_socio})'''
+    def __str__(self):
+        return f'''Socio(Código del socio={self._legajo_dni}, 
+                nombre= {self._nombre},
+                apellido= {self._apellido},
+                fecha de inscripción= {self._fecha_inscripcion},
+                domicilio calle= {self._domicilio_calle},
+                barrio= {self._barrio},
+                localidad= {self._localidad},
+                estado= {self._estado_socio})'''
     
         
