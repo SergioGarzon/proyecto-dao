@@ -44,9 +44,50 @@ pip install pillow
 
 Otra cosa, la base de datos cuyo nombre es "base_datos.db", se recomienda borrarla a menudo, para borrarla podemos poner este comando en la terminal
 
+La base de datos se crea con SQLite
+
 ```cmd
 rm ./base_datos.db
 ```  
+
+Para que el proyecto funcione tambien debemos instalar el ORM de SQLAlchemy, para ello en la terminal, escribimos el siguiente comando:
+
+```cmd
+pip install sqlalchemy
+```
+
+Para que funcione la ventana final de flet, hay que instalar la libreria de flet y tambien ejecutar flet en la terminal, para ello ponemos los comandos que dieron los profes en la documentación:
+
+Para verificar la version de python
+
+```cmd
+python --version
+```
+Para crear un entorno virtual en la terminal de Visual Studio Code:
+
+```cmd
+python -m venv .venv
+```
+
+Activara el entorno virtual en el PowerShell:
+
+
+```cmd
+Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+```
+
+Instalar la libreria de Flet:
+
+```cmd
+python -m pip install --upgrade "flet[all]"
+```
+
+Para verificar el entorno para trabajar con Flet:
+
+```cmd
+flet doctor
+```
 
 ---
 # Enunciado
