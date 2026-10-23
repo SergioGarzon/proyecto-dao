@@ -1,15 +1,21 @@
+# Aqui lo que hago es importar sqlalchemy el ORM para que se mapee de la base de datos
+from sqlalchemy import Column, Integer, String, Date 
+from datetime import date
+
 from estado_socio import EstadoSocio
 
 class Socio:
     
-    _legajo_dni = None
-    _nombre = None
-    _apellido = None
-    _fecha_inscripcion = None
-    _domicilio_calle = None
-    _barrio = None
-    _localidad = None
-    _estado_socio = None
+    __tablename__ = "socios"  # Pongo el nombre de la tabla
+    
+    _legajo_dni = Column(Integer, primary_key=True, autoincrement=False, unique=True)
+    _nombre = Column(String(10), nullable=False)
+    _apellido = Column(String(10), nullable=False)
+    _fecha_inscripcion = Column(Date, nullable=False, default=date.today) 
+    _domicilio_calle = Column(String(20), nullable=False)
+    _barrio = Column(String(20), nullable=False)
+    _localidad = Column(String(20), nullable=False)
+    _estado_socio = Column(String(20), nullable=False)
     
     def __init__(self, nuevo_legajo_dni, nuevo_nombre, nuevo_apellido, nueva_fecha_inscripcion, nuevo_domicilio, nuevo_barrio, nueva_localidad, nuevo_estado):
         self._legajo_dni = nuevo_legajo_dni
