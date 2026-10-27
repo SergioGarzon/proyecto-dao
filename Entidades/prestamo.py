@@ -12,8 +12,8 @@ class Prestamo:
         self.fecha_devolucion = fecha_devolucion
         self.estado = estado
 
-    def agregar_detalle(self, libro):
-        self.detalle_prestamo.append(DetallePrestamo(libro))
+    def agregar_detalle(self, ejemplar):
+        self.detalle_prestamo.append(DetallePrestamo(ejemplar))
     
     @property
     def id_prestamo(self): 

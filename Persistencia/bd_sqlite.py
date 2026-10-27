@@ -40,22 +40,28 @@ class ConectionDAO:
 
             query_tabla_ejemplares = '''
                 CREATE TABLE IF NOT EXISTS ejemplares (
-                    id_ejemplar INTEGER PRIMARY KEY AUTOINCREMENT)
+                    id_ejemplar INTEGER PRIMARY KEY AUTOINCREMENT,
+                    codigo_libro INTEGER NOT NULL,
+                    id_sede INTEGER NOT NULL,
+                    estado TEXT,
+                    FOREIGN KEY (codigo_libro) REFERENCES libros(codigo_libro),
+                    FOREIGN KEY (id_sede) REFERENCES sedes(id_sede))
                 '''
 
             query_tabla_sedes = '''
                 CREATE TABLE IF NOT EXISTS sedes (
-                    id_sede INTEGER PRIMARY KEY AUTOINCREMENT)
+                    id_sede INTEGER PRIMARY KEY AUTOINCREMENT
+                    estado TEXT)
                 '''
 
             query_table_detalles_prestamos = '''
             CREATE TABLE IF NOT EXISTS detalles_prestamo (
             id_detalle INTEGER PRIMARY KEY AUTOINCREMENT,
             id_prestamo INTEGER NOT NULL,
-            codigo_libro INTEGER NOT NULL,
+            id_ejemplar INTEGER NOT NULL,
             estado_material TEXT,
             FOREIGN KEY (id_prestamo)  REFERENCES prestamos(id_prestamo) ON DELETE CASCADE,
-            FOREIGN KEY (codigo_libro) REFERENCES libros(codigo_libro))
+            FOREIGN KEY (id_ejemplar) REFERENCES ejemplares(id_ejemplar))
             '''
 
             query_tabla_libros = '''
@@ -117,7 +123,7 @@ class ConectionDAO:
         return resultados
 
     @staticmethod
-    def insertar_prestamo(query_str):
+    def insertar_prestamo(prestamo):
         connection = None
 
         try:
@@ -143,13 +149,13 @@ class ConectionDAO:
             id_nuevo = cursor.lastrowid
 
             query_detalle = '''
-                INSERT INTO detalles_prestamo (id_prestamo, codigo_libro, estado_material)
+                INSERT INTO detalles_prestamo (id_prestamo, id_ejemplar, estado_material)
                 VALUES (?, ?, ?)
             '''
             for detalle in prestamo.detalle_prestamo:
                 cursor.execute(query_detalle, (
                     id_nuevo,
-                    detalle.libro.codigo_libro,
+                    detalle.ejemplar.id_ejemplar,
                     detalle.estado_material
                 ))
 
