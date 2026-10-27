@@ -1,4 +1,4 @@
-from estado_socio import EstadoSocio
+from Entidades.estado_socio import EstadoSocio
 
 class Socio:
     

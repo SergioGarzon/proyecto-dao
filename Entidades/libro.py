@@ -1,4 +1,4 @@
-from estado_libro import EstadoLibro
+from Entidades.estado_libro import EstadoLibro
 
 class Libro:
     
