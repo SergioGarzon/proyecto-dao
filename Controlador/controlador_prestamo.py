@@ -8,6 +8,35 @@ from Entidades.ejemplar import Ejemplar
 
 class ControladorPrestamo:
 
+    def __init__(self):
+        ConectionDAO.crear_tablas()
+
+    # Consultas para cargar las pantallas
+    def consultar_prestamos(self):
+        query = '''
+            SELECT p.id_prestamo, p.socio_legajo_dni, p.sede_origen, p.sede_destino, p.tipo,
+                   p.fecha_prestamo, p.fecha_devolucion, p.estado,
+                   GROUP_CONCAT(d.id_ejemplar, ', ')
+            FROM prestamos p
+            LEFT JOIN detalles_prestamo d ON d.id_prestamo = p.id_prestamo
+            GROUP BY p.id_prestamo
+            ORDER BY p.id_prestamo DESC
+        '''
+        return ConectionDAO.obtener_prestamos(query)
+
+    def listar_socios_activos(self):
+        return ConectionDAO.obtener_prestamos(
+            "SELECT legajo_dni, nombre, apellido FROM socios WHERE estado_socio = 'Activo' ORDER BY apellido")
+
+    def listar_sedes_activas(self):
+        return ConectionDAO.obtener_prestamos(
+            "SELECT id_sede FROM sedes WHERE estado = 'Activa' ORDER BY id_sede")
+
+    def listar_ejemplares_disponibles(self, id_sede):
+        return ConectionDAO.consultar_todos(
+            "SELECT id_ejemplar, codigo_libro FROM ejemplares WHERE estado = 'Disponible' AND id_sede = ? ORDER BY id_ejemplar",
+            (id_sede,))
+
     def registrar_prestamo(self, legajo_dni, id_sede_origen, id_sede_destino, tipo, fecha_prestamo, ejemplares):
 
         # Validamos que los ejemplares sean válidos

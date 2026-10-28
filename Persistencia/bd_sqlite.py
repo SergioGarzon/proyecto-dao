@@ -184,10 +184,25 @@ class ConectionDAO:
             connection = sqlite3.connect("base_datos.db")
             cursor = connection.cursor()
             cursor.execute(query_str, parametros)
-            return cursor.fetchone()  # Devuelve una tupla, o None si no existe
+            return cursor.fetchone()
         except sqlite3.Error as error:
             print("Error en la consulta:", error)
             return None
+        finally:
+            if connection:
+                connection.close()
+
+    @staticmethod
+    def consultar_todos(query_str, parametros=()):
+        connection = None
+        try:
+            connection = sqlite3.connect("base_datos.db")
+            cursor = connection.cursor()
+            cursor.execute(query_str, parametros)
+            return cursor.fetchall()  # Devuelve una lista de tuplas
+        except sqlite3.Error as error:
+            print("Error en la consulta:", error)
+            return []
         finally:
             if connection:
                 connection.close()
