@@ -50,7 +50,7 @@ class ConectionDAO:
 
             query_tabla_sedes = '''
                 CREATE TABLE IF NOT EXISTS sedes (
-                    id_sede INTEGER PRIMARY KEY AUTOINCREMENT
+                    id_sede INTEGER PRIMARY KEY AUTOINCREMENT,
                     estado TEXT)
                 '''
 
@@ -158,6 +158,9 @@ class ConectionDAO:
                     detalle.ejemplar.id_ejemplar,
                     detalle.estado_material
                 ))
+                cursor.execute(
+                    "UPDATE ejemplares SET estado = ? WHERE id_ejemplar = ?",
+                    (detalle.ejemplar.estado, detalle.ejemplar.id_ejemplar))
 
             connection.commit()
             prestamo.id_prestamo = id_nuevo
@@ -174,9 +177,21 @@ class ConectionDAO:
             if connection:
                 connection.close()
 
+    @staticmethod
+    def consultar_uno(query_str, parametros=()):
+        connection = None
+        try:
+            connection = sqlite3.connect("base_datos.db")
+            cursor = connection.cursor()
+            cursor.execute(query_str, parametros)
+            return cursor.fetchone()  # Devuelve una tupla, o None si no existe
+        except sqlite3.Error as error:
+            print("Error en la consulta:", error)
+            return None
+        finally:
+            if connection:
+                connection.close()
 
-
-        
     @staticmethod
     def obtener_prestamos(query_str):
         connection = None
