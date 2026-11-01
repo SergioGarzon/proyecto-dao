@@ -4,6 +4,7 @@ from tkinter import messagebox
 import tkinter as tk
 import platform
 from Controlador.controlador_prestamo import ControladorPrestamo
+from Entidades.excepciones import ReglaNegocioError
 
 class InsercionPrestamos:
 
@@ -137,9 +138,9 @@ class InsercionPrestamos:
         ids_ejemplares = [self.ejemplares_disponibles[i][0] for i in self.lista_ejemplares.curselection()]
 
         try:
-            prestamo = self.controlador_prestamos.registrar_prestamo(
-                legajo, id_sede_origen, id_sede_destino, tipo, None, ids_ejemplares)
-        except ValueError as error:
+            id_prestamo = self.controlador_prestamos.registrar_prestamo(
+                legajo, id_sede_origen, id_sede_destino, tipo, ids_ejemplares)
+        except ReglaNegocioError as error:
             # Validaciones de negocio que no se cumplieron (socio inactivo, sede de baja, etc.)
             messagebox.showerror("No se puede registrar el préstamo", str(error), parent=self.windows_insercion_prestamo)
             return
@@ -147,7 +148,7 @@ class InsercionPrestamos:
             messagebox.showerror("Error", f"Ocurrió un error al guardar: {error}", parent=self.windows_insercion_prestamo)
             return
 
-        messagebox.showinfo("Préstamo registrado", f"Se registró el préstamo N° {prestamo.id_prestamo}.", parent=self.windows_insercion_prestamo)
+        messagebox.showinfo("Préstamo registrado", f"Se registró el préstamo N° {id_prestamo}.", parent=self.windows_insercion_prestamo)
 
         if self.al_registrar:
             self.al_registrar()

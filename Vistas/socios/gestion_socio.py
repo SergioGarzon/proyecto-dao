@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 import platform
 from Controlador.controlador_socio import ControladorSocio
+from Entidades.excepciones import ReglaNegocioError
 from Vistas.socios.insercion_socios import InsercionSocios
 
 class PantallaGestionSocio:
@@ -12,7 +13,6 @@ class PantallaGestionSocio:
         self.windows_gestion_socio = tk.Toplevel() 
         self.windows_properties()
         
-        # esto despues lo sacamos, porque es para crear la tabla, pero solo una igual
         self.controlador_socios = ControladorSocio()
         
         self.windows_components()    
@@ -101,9 +101,7 @@ class PantallaGestionSocio:
                 
     #  Metodo para consultar datos
     def consultar_datos(self):
-        query_ejemplo = "SELECT legajo_dni, nombre, apellido, fecha_inscripcion, domicilio_calle, barrio, localidad, estado_socio FROM socios"
-        lista_resultados = self.controlador_socios.consultar_socios(query_ejemplo)  
-        return lista_resultados   
+        return self.controlador_socios.consultar_socios()
     
        
     # Metodo del boton para actualizar la lista
@@ -128,11 +126,12 @@ class PantallaGestionSocio:
             messagebox.showerror("Error", "No se ha insertado el legajo del socio a buscar!")
             return
                     
-        legajo_socio = str(self.textbox_legajo_socio.get())
-                    
-        query_buscar = f"SELECT legajo_dni, nombre, apellido, fecha_inscripcion, domicilio_calle, barrio, localidad, estado_socio FROM socios WHERE legajo_dni = {legajo_socio}"
-        lista_resultados = self.controlador_socios.consultar_socios(query_buscar) 
-        
+        try:
+            lista_resultados = self.controlador_socios.buscar_socio(self.textbox_legajo_socio.get())
+        except ReglaNegocioError as error:
+            messagebox.showerror("Error", str(error))
+            return
+
         if len(lista_resultados) == 0:
             messagebox.showwarning("Advertencia", "No se han encontrado socios con dicho legajo")
         else:
@@ -155,9 +154,8 @@ class PantallaGestionSocio:
             value_confirm = str(messagebox.askquestion(message=f"Estas seguro que deseas eliminar al socio con legajo {valores[0]}?", title="Confirme"))
                     
             if value_confirm == "yes":
-                query_buscar = f"DELETE FROM socios WHERE legajo_dni = {valores[0]}"
-                self.controlador_socios.eliminar_socio(query_buscar) 
-                messagebox.showinfo("Éxito", "Eliminado correctamente") 
+                self.controlador_socios.eliminar_socio(valores[0])
+                messagebox.showinfo("Éxito", "Socio dado de baja correctamente")
                 self.actualizar_tabla()
                 
                     

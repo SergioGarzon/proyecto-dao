@@ -35,25 +35,22 @@ De esta forma, nos saldra la ventana de presentación:
 
 !["Ventana del proyecto"](./Recursos/Ventana%20proyecto.png)
 
-Si en caso, de que no funcione el proyecto, entonces debemos instalar la libreria de Pillow, para ello
-escribimos el siguiente comando en la terminal:
+Para instalar las librerias del proyecto, escribimos el siguiente comando en la terminal:
 
 ```cmd
-pip install pillow
-```  
+pip install -r requirements.txt
+```
 
-Otra cosa, la base de datos cuyo nombre es "base_datos.db", se recomienda borrarla a menudo, para borrarla podemos poner este comando en la terminal
-
-La base de datos se crea con SQLite
+La base de datos usa SQLite con el ORM SQLAlchemy. El archivo "biblioteca.db" se crea solo al ejecutar el proyecto. Si cambia alguna tabla, hay que cerrar el sistema y borrar ese archivo para que se vuelva a crear:
 
 ```cmd
-rm ./base_datos.db
-```  
+rm ./biblioteca.db
+```
 
-Para que el proyecto funcione tambien debemos instalar el ORM de SQLAlchemy, para ello en la terminal, escribimos el siguiente comando:
+Para llenar una base vacía con datos de prueba (sedes, socios, libros, préstamos, remitos, multas y reservas), ejecutamos:
 
 ```cmd
-pip install sqlalchemy
+python ./cargar_datos_prueba.py
 ```
 
 Para que funcione la ventana final de flet, hay que instalar la libreria de flet y tambien ejecutar flet en la terminal, para ello ponemos los comandos que dieron los profes en la documentación:
