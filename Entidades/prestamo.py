@@ -1,89 +1,70 @@
+from datetime import timedelta
+
+from sqlalchemy import Column, Date, Enum, ForeignKey, Integer
+from sqlalchemy.orm import relationship
+
 from Entidades.detalle_prestamo import DetallePrestamo
-
-class Prestamo:
-    def __init__(self, id_prestamo, socio, sede_origen, sede_destino, tipo, fecha_prestamo, fecha_devolucion, estado):
-        self.id_prestamo = id_prestamo
-        self.socio = socio
-        self.detalle_prestamo = []
-        self.sede_origen = sede_origen
-        self.sede_destino = sede_destino
-        self.tipo = tipo
-        self.fecha_prestamo = fecha_prestamo
-        self.fecha_devolucion = fecha_devolucion
-        self.estado = estado
-
-    def agregar_detalle(self, ejemplar):
-        self.detalle_prestamo.append(DetallePrestamo(ejemplar))
-    
-    @property
-    def id_prestamo(self): 
-        return self._id_prestamo
-
-    @property
-    def socio(self):
-        return self._socio
-
-    @property
-    def detalle_prestamo(self):
-        return self._detalle_prestamo
-
-    @property
-    def fecha_prestamo(self):
-        return self._fecha_prestamo
-
-    @property
-    def fecha_devolucion(self):
-        return self._fecha_devolucion
-
-    @property
-    def sede_origen(self):
-        return self._sede_origen
-
-    @property
-    def sede_destino(self):
-        return self._sede_destino
-
-    @property
-    def tipo(self):
-        return self._tipo
-
-    @property
-    def estado(self):
-        return self._estado
+from Entidades.enums import EstadoPrestamo, TipoPrestamo
+from Entidades.excepciones import ReglaNegocioError
+from Persistencia.conexion import Base
 
 
-    @id_prestamo.setter
-    def id_prestamo(self, nuevo_id_prestamo):
-        self._id_prestamo = nuevo_id_prestamo
+class Prestamo(Base):
+    __tablename__ = "prestamos"
 
-    @socio.setter
-    def socio(self, nuevo_socio):
-        self._socio = nuevo_socio
+    PLAZO_DIAS = 14
 
-    @detalle_prestamo.setter
-    def detalle_prestamo(self, nuevo_detalle_prestamo):
-        self._detalle_prestamo = nuevo_detalle_prestamo
+    id_prestamo = Column(Integer, primary_key=True)
+    legajo_dni = Column(ForeignKey("socios.legajo_dni"), nullable=False)
+    id_sede_origen = Column(ForeignKey("sedes.id_sede"), nullable=False)
+    id_sede_destino = Column(ForeignKey("sedes.id_sede"), nullable=False)
+    tipo = Column(Enum(TipoPrestamo), nullable=False)
+    estado = Column(Enum(EstadoPrestamo), nullable=False, default=EstadoPrestamo.PENDIENTE_ENVIO)
+    fecha_prestamo = Column(Date, nullable=False)
+    # En un interbibliotecario se fija recién cuando el material llega a destino
+    fecha_vencimiento = Column(Date)
 
-    @fecha_prestamo.setter
-    def fecha_prestamo(self, nueva_fecha_prestamo):
-        self._fecha_prestamo = nueva_fecha_prestamo
+    socio = relationship("Socio", back_populates="prestamos")
+    sede_origen = relationship("Sede", foreign_keys=[id_sede_origen])
+    sede_destino = relationship("Sede", foreign_keys=[id_sede_destino])
+    detalles = relationship("DetallePrestamo", back_populates="prestamo", cascade="all, delete-orphan")
+    remitos = relationship("Remito", back_populates="prestamo")
 
-    @fecha_devolucion.setter
-    def fecha_devolucion(self, nueva_fecha_devolucion):
-        self._fecha_devolucion = nueva_fecha_devolucion
+    def es_interbibliotecario(self):
+        return self.tipo == TipoPrestamo.INTERBIBLIOTECARIO
 
-    @sede_origen.setter
-    def sede_origen(self, nueva_sede_origen):
-        self._sede_origen = nueva_sede_origen
+    def agregar_ejemplar(self, ejemplar):
+        if not ejemplar.esta_disponible():
+            raise ReglaNegocioError(f"El ejemplar {ejemplar.codigo_inventario} no está disponible.")
+        if not ejemplar.pertenece_a(self.sede_origen):
+            raise ReglaNegocioError(
+                f"El ejemplar {ejemplar.codigo_inventario} no pertenece a la sede {self.sede_origen.nombre}.")
+        self.detalles.append(DetallePrestamo(ejemplar=ejemplar, estado_fisico_salida=ejemplar.estado_fisico))
 
-    @sede_destino.setter
-    def sede_destino(self, nueva_sede_destino):
-        self._sede_destino = nueva_sede_destino
+    def validar_sedes(self):
+        self.sede_origen.validar_activa()
+        self.sede_destino.validar_activa()
+        misma_sede = self.sede_origen.id_sede == self.sede_destino.id_sede
+        if self.es_interbibliotecario() and misma_sede:
+            raise ReglaNegocioError("En un préstamo interbibliotecario las sedes deben ser distintas.")
+        if not self.es_interbibliotecario() and not misma_sede:
+            raise ReglaNegocioError("En un préstamo local la sede de origen y destino debe ser la misma.")
 
-    @tipo.setter
-    def tipo(self, nuevo_tipo):
-        self._tipo = nuevo_tipo
+    def activar(self, hoy):
+        self.estado = EstadoPrestamo.ACTIVO
+        self.fecha_vencimiento = hoy + timedelta(days=self.PLAZO_DIAS)
+        for detalle in self.detalles:
+            detalle.ejemplar.marcar_prestado()
 
-    @estado.setter
-    def estado(self, nuevo_estado):
-        self._estado = nuevo_estado
+    def esta_vencido(self, hoy):
+        return self.estado == EstadoPrestamo.ACTIVO and self.fecha_vencimiento < hoy
+
+    def dias_atraso(self, fecha):
+        return max(0, (fecha - self.fecha_vencimiento).days)
+
+    def verificar_cierre(self):
+        if all(detalle.fue_devuelto() for detalle in self.detalles):
+            self.estado = EstadoPrestamo.DEVUELTO
+
+    def marcar_incidencia(self):
+        self.estado = EstadoPrestamo.CON_INCIDENCIA

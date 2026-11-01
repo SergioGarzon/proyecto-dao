@@ -3,6 +3,7 @@
 
 # Borramos la base de datos
 base_datos.db
+biblioteca.db
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -186,5 +187,10 @@ pyrightconfig.json
 
 #Otros documentos
 division_tareas.pdf
+
+# Archivos locales que no forman parte de la entrega
+docs/
+tests/
+Persistencia/datos_iniciales.py
 
 # End of https://www.toptal.com/developers/gitignore/api/python

@@ -1,7 +1,14 @@
 import tkinter as tk
 import platform
 import os
+from Persistencia.conexion import ConexionBD
 from Vistas.pantalla_inicial import PantallaInicial
+
+# Los datos de ejemplo son un archivo local: sin él la base arranca vacía
+try:
+    from Persistencia.datos_iniciales import cargar_datos_iniciales
+except ModuleNotFoundError:
+    cargar_datos_iniciales = None
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
@@ -84,5 +91,8 @@ class PantallaPrincipal():
         PantallaInicial()
 
 if __name__ == "__main__":
+    ConexionBD().crear_tablas()
+    if cargar_datos_iniciales:
+        cargar_datos_iniciales()
     app_inicial = PantallaPrincipal()
     app_inicial.windows_main.mainloop()

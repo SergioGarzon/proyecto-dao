@@ -48,7 +48,7 @@ class PantallaGestionPrestamo:
         self.tabla.heading("Sede_Destino", text="Sede Destino")
         self.tabla.heading("Tipo", text="Tipo")
         self.tabla.heading("Fecha_Prestamo", text="Fecha Préstamo")
-        self.tabla.heading("Fecha_Devolucion", text="Fecha Devolución")
+        self.tabla.heading("Fecha_Devolucion", text="Vencimiento")
         self.tabla.heading("Estado", text="Estado")
         self.tabla.heading("Ejemplares", text="Ejemplares")
 
