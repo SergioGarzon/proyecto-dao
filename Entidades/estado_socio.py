@@ -1,6 +1,16 @@
+from sqlalchemy import Column, Integer, String, Date 
+
 class EstadoSocio:
     
-    _estado_socio = None
+    __tablename__ = "estados_socios" # Pongo el nombre de la tabla Estados Socios    
+    
+    _id_estado_socio = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    _estado_socio = Column(String(20), nullable=False)
+    
+    
+    # Hay que ver bien esto
+    socios = relationship('socios', back_populates='estados_socios')
+        
     
     def __init__(self, nuevo_estado):
         self._estado_socio = nuevo_estado

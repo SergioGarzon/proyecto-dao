@@ -1,9 +1,10 @@
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
+from tkinter import messagebox
 import platform
 from Controlador.controlador_socio import ControladorSocio
-from Vistas.insercion_socios import InsercionSocios
+from Vistas.socios.insercion_socios import InsercionSocios
 
 class PantallaGestionSocio:
     
@@ -28,7 +29,7 @@ class PantallaGestionSocio:
         
         label_name_form = tk.Label(frame_4, text="Gestión de Socios")
         label_socio_legajo_buscar = tk.Label(frame_4, text="Ingrese el legajo del Socio:")
-        textbox_legajo_socio = tk.Entry(frame_4, font=("Arial", 14), width=30)
+        self.textbox_legajo_socio = tk.Entry(frame_4, font=("Arial", 14), width=30)
         
         if str(platform.system()) == "Windows":
             label_name_form.config(fg="blue", bg="lightyellow", font=("Arial", 25))     
@@ -36,6 +37,7 @@ class PantallaGestionSocio:
             btn_buscar_socio = tk.Button(frame_4, text="Buscar socio", cursor="Hand2")                                      
             btn_actualizar = tk.Button(frame_4, text="Actualizar tabla de socios", cursor="Hand2")
             btn_insertar_datos_socios = tk.Button(frame_4, text="Crear socios", cursor="Hand2") 
+            btn_eliminar_socio = tk.Button(frame_4, text="Eliminar socios", cursor="Hand2")
             btn_cerrar = tk.Button(frame_4, text="Cerrar ventana", cursor="Hand2") 
         else:    
             label_name_form.config(fg="blue", bg="lightyellow")
@@ -43,9 +45,14 @@ class PantallaGestionSocio:
             btn_buscar_socio = tk.Button(frame_4, text="Buscar socio") 
             btn_actualizar = tk.Button(frame_4, text="Actualizar tabla de socios")  
             btn_insertar_datos_socios = tk.Button(frame_4, text="Crear socios") 
+            btn_eliminar_socio = tk.Button(frame_4, text="Eliminar socios")
             btn_cerrar = tk.Button(frame_4, text="Cerrar ventana")          
         
         btn_buscar_socio.config(fg="white", bg="blue", font=("Arial", 15, "bold"))  
+        btn_buscar_socio.config(command=self.mostrar_datos_tabla_filtrada_nro_socio)  
+        
+        btn_eliminar_socio.config(fg="white", bg="orange", font=("Arial", 15, "bold"))  
+        btn_eliminar_socio.config(command=self.eliminar_socio)  
         
         columnas = ("Legajo", "Nombre", "Apellido", "Fecha_Inscripcion", "Domicilio", "Barrio", "Localidad", "Estado")
         
@@ -75,7 +82,7 @@ class PantallaGestionSocio:
         btn_actualizar.config(fg="white", bg="green", font=("Arial", 15, "bold"))  
         btn_actualizar.config(command=self.actualizar_tabla)  
         
-        btn_insertar_datos_socios.config(fg="white", bg="blue", font=("Arial", 15, "bold"))  
+        btn_insertar_datos_socios.config(fg="white", bg="green", font=("Arial", 15, "bold"))  
         btn_insertar_datos_socios.config(command=self.insertar_informacion)          
         
         btn_cerrar.config(fg="white", bg="red", font=("Arial", 15, "bold"))  
@@ -84,19 +91,22 @@ class PantallaGestionSocio:
         frame_4.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         label_name_form.pack(pady=5)
         label_socio_legajo_buscar.pack(pady=5)
-        textbox_legajo_socio.pack(pady=5)
+        self.textbox_legajo_socio.pack(pady=5)
         btn_buscar_socio.pack(pady=5) 
         btn_actualizar.pack(pady=5)
         self.tabla.pack(fill=tk.BOTH, expand=True, pady=15)
-        btn_insertar_datos_socios.pack(pady=10)
-        btn_cerrar.pack()
+        btn_eliminar_socio.pack(pady=10, side="right")
+        btn_insertar_datos_socios.pack(pady=10, side="right")
+        btn_cerrar.pack(side="left")
                 
-        
+    #  Metodo para consultar datos
     def consultar_datos(self):
         query_ejemplo = "SELECT legajo_dni, nombre, apellido, fecha_inscripcion, domicilio_calle, barrio, localidad, estado_socio FROM socios"
         lista_resultados = self.controlador_socios.consultar_socios(query_ejemplo)  
-        return lista_resultados      
-
+        return lista_resultados   
+    
+       
+    # Metodo del boton para actualizar la lista
     def actualizar_tabla(self):
         for elemento in self.tabla.get_children():
             self.tabla.delete(elemento)
@@ -105,10 +115,54 @@ class PantallaGestionSocio:
         
         for fila in lista_resultados:
             self.tabla.insert("", tk.END, values=fila)
-
+            
+        self.textbox_legajo_socio.delete(0, tk.END)
+        
+    # Metodo para el boton de insertar nuevo socio, nos va a derivar al nuevo formulario
     def insertar_informacion(self):
         InsercionSocios()
+        
+    # Metodo para el boton que busca socio por medio de un legajo ingresado    
+    def mostrar_datos_tabla_filtrada_nro_socio(self):        
+        if str(self.textbox_legajo_socio.get()) == "":
+            messagebox.showerror("Error", "No se ha insertado el legajo del socio a buscar!")
+            return
+                    
+        legajo_socio = str(self.textbox_legajo_socio.get())
+                    
+        query_buscar = f"SELECT legajo_dni, nombre, apellido, fecha_inscripcion, domicilio_calle, barrio, localidad, estado_socio FROM socios WHERE legajo_dni = {legajo_socio}"
+        lista_resultados = self.controlador_socios.consultar_socios(query_buscar) 
+        
+        if len(lista_resultados) == 0:
+            messagebox.showwarning("Advertencia", "No se han encontrado socios con dicho legajo")
+        else:
+            for elemento in self.tabla.get_children():
+                        self.tabla.delete(elemento)
+                        
+            for fila in lista_resultados:
+                self.tabla.insert("", tk.END, values=fila)     
     
+    # Metodo para eliminar los datos del socio
+    def eliminar_socio(self):
+        seleccion = self.tabla.selection()
+    
+        if not seleccion:        
+            messagebox.showwarning("Advertencia", "Por favor, selecciona una fila de la tabla.")
+        else:
+            id_fila = seleccion[0]
+            valores = self.tabla.item(id_fila, "values")              
+            
+            value_confirm = str(messagebox.askquestion(message=f"Estas seguro que deseas eliminar al socio con legajo {valores[0]}?", title="Confirme"))
+                    
+            if value_confirm == "yes":
+                query_buscar = f"DELETE FROM socios WHERE legajo_dni = {valores[0]}"
+                self.controlador_socios.eliminar_socio(query_buscar) 
+                messagebox.showinfo("Éxito", "Eliminado correctamente") 
+                self.actualizar_tabla()
+                
+                    
+        
+    # Metodo para el boton que cierra la ventana
     def cerrar_ventana(self):
         self.windows_gestion_socio.destroy()
         
