@@ -1,4 +1,4 @@
-from estado_sede import EstadoSede
+from Entidades.estado_sede import EstadoSede
 
 class Sede:
     

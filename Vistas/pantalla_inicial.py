@@ -7,6 +7,7 @@ import flet as ft
 from Vistas.sedes.gestion_sede import PantallaGestionSede
 from Vistas.socios.gestion_socio import PantallaGestionSocio
 from Vistas.reportes.reportes_generales import PantallaReportesGenerales
+from Vistas.gestion_prestamo import PantallaGestionPrestamo
 from Vistas.version.version_proyecto import main
 
 # Instalar PILLOW 'pip install pillow'
@@ -62,7 +63,7 @@ class PantallaInicial:
         btn_gestion_libros.config(command=self.mensaje_botones) 
         
         btn_gestion_prestamos.config(fg="white", bg="green", font=("Arial", 15, "bold"))
-        btn_gestion_prestamos.config(command=self.mensaje_botones) 
+        btn_gestion_prestamos.config(command=self.activar_ventana_gestion_prestamos)
         
         btn_gestion_reservas.config(fg="white", bg="pink", font=("Arial", 15, "bold"))
         btn_gestion_reservas.config(command=self.mensaje_botones) 
@@ -106,6 +107,12 @@ class PantallaInicial:
     
     def activar_ventana_gestion_socios(self):
         PantallaGestionSocio()
+    
+    def activar_ventana_gestion_prestamos(self):
+        PantallaGestionPrestamo()
+
+    def salir_sistema(self):
+        self.windows_inicial.destroy()
     
     def activar_ventana_reportes(self):
         PantallaReportesGenerales()
