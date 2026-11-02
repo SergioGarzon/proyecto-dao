@@ -69,7 +69,7 @@ class PantallaInicial:
         btn_gestion_reservas.config(command=self.mensaje_botones) 
         
         btn_gestion_devoluciones.config(fg="white", bg="orange", font=("Arial", 15, "bold"))
-        btn_gestion_devoluciones.config(command=self.mensaje_botones)          
+        btn_gestion_devoluciones.config(command=self.activar_ventana_gestion_prestamos)          
         
         btn_salir_sistema.config(fg="white", bg="red", font=("Arial", 15, "bold"))
         btn_salir_sistema.config(command=self.salir_sistema)

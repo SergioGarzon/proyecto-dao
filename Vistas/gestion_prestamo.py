@@ -1,8 +1,11 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 import tkinter as tk
 import platform
 from Controlador.controlador_prestamo import ControladorPrestamo
+from Entidades.excepciones import ReglaNegocioError
+from Vistas.devolucion_prestamos import DevolucionPrestamos
 from Vistas.insercion_prestamos import InsercionPrestamos
 
 class PantallaGestionPrestamo:
@@ -31,11 +34,13 @@ class PantallaGestionPrestamo:
             label_name_form.config(fg="blue", bg="lightyellow", font=("Arial", 25))
             btn_actualizar = tk.Button(frame_6, text="Actualizar tabla de préstamos", cursor="Hand2")
             btn_nuevo_prestamo = tk.Button(frame_6, text="Nuevo préstamo", cursor="Hand2")
+            btn_devolucion = tk.Button(frame_6, text="Registrar devolución", cursor="Hand2")
             btn_cerrar = tk.Button(frame_6, text="Cerrar ventana", cursor="Hand2")
         else:
             label_name_form.config(fg="blue", bg="lightyellow")
             btn_actualizar = tk.Button(frame_6, text="Actualizar tabla de préstamos")
             btn_nuevo_prestamo = tk.Button(frame_6, text="Nuevo préstamo")
+            btn_devolucion = tk.Button(frame_6, text="Registrar devolución")
             btn_cerrar = tk.Button(frame_6, text="Cerrar ventana")
 
         columnas = ("Id", "Socio", "Sede_Origen", "Sede_Destino", "Tipo", "Fecha_Prestamo", "Fecha_Devolucion", "Estado", "Ejemplares")
@@ -71,6 +76,9 @@ class PantallaGestionPrestamo:
         btn_nuevo_prestamo.config(fg="white", bg="blue", font=("Arial", 15, "bold"))
         btn_nuevo_prestamo.config(command=self.nuevo_prestamo)
 
+        btn_devolucion.config(fg="white", bg="orange", font=("Arial", 15, "bold"))
+        btn_devolucion.config(command=self.registrar_devolucion)
+
         btn_cerrar.config(fg="white", bg="red", font=("Arial", 15, "bold"))
         btn_cerrar.config(command=self.cerrar_ventana)
 
@@ -78,7 +86,8 @@ class PantallaGestionPrestamo:
         label_name_form.pack(pady=5)
         btn_actualizar.pack(pady=5)
         self.tabla.pack(fill=tk.BOTH, expand=True, pady=15)
-        btn_nuevo_prestamo.pack(pady=10)
+        btn_nuevo_prestamo.pack(pady=5)
+        btn_devolucion.pack(pady=5)
         btn_cerrar.pack()
 
     def actualizar_tabla(self):
@@ -95,6 +104,18 @@ class PantallaGestionPrestamo:
     def nuevo_prestamo(self):
         # Le pasamos la función para que la tabla se refresque sola al registrar un préstamo
         InsercionPrestamos(self.actualizar_tabla)
+
+    def registrar_devolucion(self):
+        seleccion = self.tabla.selection()
+        if not seleccion:
+            messagebox.showwarning("Sin selección", "Seleccione un préstamo de la tabla.", parent=self.windows_gestion_prestamo)
+            return
+
+        id_prestamo = int(self.tabla.item(seleccion[0], "values")[0])
+        try:
+            DevolucionPrestamos(id_prestamo, self.actualizar_tabla)
+        except ReglaNegocioError as error:
+            messagebox.showerror("No se puede registrar la devolución", str(error), parent=self.windows_gestion_prestamo)
 
     def cerrar_ventana(self):
         self.windows_gestion_prestamo.destroy()

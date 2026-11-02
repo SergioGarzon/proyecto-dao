@@ -1,5 +1,8 @@
 from datetime import date
 
+from Entidades.enums import EstadoFisico, TipoPrestamo, TipoRemito
+from Entidades.multa import Multa
+
 from Entidades.enums import TipoPrestamo, TipoRemito
 from Entidades.excepciones import ReglaNegocioError
 from Entidades.prestamo import Prestamo
@@ -87,3 +90,58 @@ class ControladorPrestamo:
 
             session.flush()  # Asigna el id para mostrarlo en pantalla
             return prestamo.id_prestamo
+
+    def obtener_prestamo(self, session, id_prestamo):
+            prestamo = PrestamoDAO(session).obtener(id_prestamo)
+            if prestamo is None:
+                raise ReglaNegocioError(f"No se encontró un préstamo con id {id_prestamo}.")
+            return prestamo
+
+    def consultar_pendientes(self, id_prestamo):
+        with ConexionBD().obtener_session() as session:
+            prestamo = self.obtener_prestamo(session, id_prestamo)
+            prestamo.validar_activo()
+            pendientes = []
+
+            for detalle in prestamo.detalles:
+                if not detalle.fue_devuelto():
+                    pendientes.append((detalle.id_detalle, detalle.id_ejemplar, detalle.ejemplar.codigo_libro, detalle.ejemplar.libro.titulo,
+                                       detalle.estado_fisico_salida.value))
+            return pendientes
+
+    def consultar_devueltos(self, id_prestamo):
+        with ConexionBD().obtener_session() as session:
+            prestamo = self.obtener_prestamo(session, id_prestamo)
+            return [(detalle.id_ejemplar, detalle.ejemplar.libro.titulo, detalle.fecha_devolucion,
+                     detalle.estado_fisico_devolucion.value)
+                    for detalle in prestamo.detalles if detalle.fue_devuelto()]
+
+    def registrar_devolucion(self, id_prestamo, id_detalles, estado_fisico, hoy=None):
+        hoy = hoy or date.today()
+
+        if not id_detalles:
+            raise ReglaNegocioError("Debe seleccionar uno o más ejemplares para registrar la devolución.")
+        fisico = EstadoFisico(estado_fisico)
+
+        with ConexionBD().obtener_session() as session:
+            prestamo = self.obtener_prestamo(session, id_prestamo)
+            prestamo.validar_activo()
+
+            multas = []
+            ejemplares = []
+            for id_detalle in id_detalles:
+                detalle = prestamo.buscar_detalle(id_detalle)
+                detalle.registrar_devolucion(hoy, fisico)
+                ejemplares.append(detalle.ejemplar)
+                multas.extend(Multa.generar(detalle, hoy))
+
+            session.add_all(multas)
+
+            vuelve_a_origen = fisico not in (EstadoFisico.DESTRUIDO, EstadoFisico.EXTRAVIADO)
+            if prestamo.es_interbibliotecario() and vuelve_a_origen:
+                remito_dao = RemitoDAO(session)
+                remito_dao.guardar(Remito(remito_dao.siguiente_numero(hoy), prestamo, prestamo.sede_destino,
+                                          prestamo.sede_origen, TipoRemito.RETORNO, ejemplares, hoy))
+
+            prestamo.verificar_cierre()
+            return sum(multa.monto for multa in multas)  # Devuelve el total de multas generadas

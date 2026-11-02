@@ -68,3 +68,13 @@ class Prestamo(Base):
 
     def marcar_incidencia(self):
         self.estado = EstadoPrestamo.CON_INCIDENCIA
+
+    def validar_activo(self):
+        if self.estado != EstadoPrestamo.ACTIVO:
+            raise ReglaNegocioError(f"El préstamo {self.id_prestamo} no está activo.")
+
+    def buscar_detalle(self, id_detalle):
+        for detalle in self.detalles:
+            if detalle.id_detalle == id_detalle:
+                return detalle
+        raise ReglaNegocioError(f"No se encontró el detalle {id_detalle} en el préstamo {self.id_prestamo}.")
