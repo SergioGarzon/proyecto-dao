@@ -30,7 +30,7 @@ class PantallaInicial:
         frame_2 = tk.Frame(self.windows_inicial)   
         frame_2.configure(bg="lightyellow") 
             
-        label_name_subject = tk.Label(frame_2, text="Biblioteca de Prestamos a Socios")                     
+        label_name_subject = tk.Label(frame_2, text="Bibliotecas UTN - extensión Prov. Córdoba")                     
             
         if str(platform.system()) == "Windows":
             label_name_subject.config(fg="black", bg="lightyellow", font=("Arial", 25))                    
