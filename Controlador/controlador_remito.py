@@ -1,11 +1,10 @@
 from Entidades.excepciones import ReglaNegocioError
+from Entidades.remito import Remito
 from Persistencia.conexion import ConexionBD
 from Persistencia.remito_dao import RemitoDAO
 
 
 class ControladorRemito:
-    """Casos de uso de remitos y envíos. Las pantallas solo llaman a estos métodos."""
-
     # Consultas para cargar las pantallas
     def consultar_remitos(self, estado=None):
         with ConexionBD().obtener_session() as session:
@@ -22,25 +21,25 @@ class ControladorRemito:
 
     # Ciclo de vida del remito: el State decide si cada transición es válida
     def despachar(self, id_remito, observacion=""):
-        self._avanzar(id_remito, "despachar", observacion)
+        self._avanzar(id_remito, Remito.despachar, observacion)
 
     def iniciar_transito(self, id_remito, observacion=""):
-        self._avanzar(id_remito, "iniciar_transito", observacion)
+        self._avanzar(id_remito, Remito.iniciar_transito, observacion)
 
     def recibir(self, id_remito, observacion=""):
-        self._avanzar(id_remito, "recibir", observacion)
+        self._avanzar(id_remito, Remito.recibir, observacion)
 
     def reportar_danio(self, id_remito, observacion=""):
-        self._avanzar(id_remito, "reportar_danio", observacion)
+        self._avanzar(id_remito, Remito.reportar_danio, observacion)
 
     def reportar_extravio(self, id_remito, observacion=""):
-        self._avanzar(id_remito, "reportar_extravio", observacion)
+        self._avanzar(id_remito, Remito.reportar_extravio, observacion)
 
     def _avanzar(self, id_remito, operacion, observacion):
         # Toda la operación usa una sesión: si el State rechaza la transición, no se guarda nada
         with ConexionBD().obtener_session() as session:
             remito = self._obtener(session, id_remito)
-            getattr(remito, operacion)()
+            operacion(remito)
             if observacion.strip():
                 remito.historial[-1].observacion = observacion.strip()[:200]
 
