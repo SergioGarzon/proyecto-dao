@@ -1,0 +1,51 @@
+from Entidades.excepciones import ReglaNegocioError
+from Persistencia.conexion import ConexionBD
+from Persistencia.remito_dao import RemitoDAO
+
+
+class ControladorRemito:
+    """Casos de uso de remitos y envíos. Las pantallas solo llaman a estos métodos."""
+
+    # Consultas para cargar las pantallas
+    def consultar_remitos(self, estado=None):
+        with ConexionBD().obtener_session() as session:
+            return [(remito.id_remito, remito.numero, remito.tipo.value, remito.id_prestamo,
+                     str(remito.sede_origen), str(remito.sede_destino), remito.fecha_emision,
+                     remito.estado, ", ".join(str(ejemplar.id_ejemplar) for ejemplar in remito.ejemplares))
+                    for remito in RemitoDAO(session).listar_por_estado(estado)]
+
+    def consultar_historial(self, id_remito):
+        with ConexionBD().obtener_session() as session:
+            remito = self._obtener(session, id_remito)
+            return [(fila.fecha_hora, fila.estado_anterior or "-", fila.estado_nuevo, fila.observacion or "")
+                    for fila in remito.historial]
+
+    # Ciclo de vida del remito: el State decide si cada transición es válida
+    def despachar(self, id_remito, observacion=""):
+        self._avanzar(id_remito, "despachar", observacion)
+
+    def iniciar_transito(self, id_remito, observacion=""):
+        self._avanzar(id_remito, "iniciar_transito", observacion)
+
+    def recibir(self, id_remito, observacion=""):
+        self._avanzar(id_remito, "recibir", observacion)
+
+    def reportar_danio(self, id_remito, observacion=""):
+        self._avanzar(id_remito, "reportar_danio", observacion)
+
+    def reportar_extravio(self, id_remito, observacion=""):
+        self._avanzar(id_remito, "reportar_extravio", observacion)
+
+    def _avanzar(self, id_remito, operacion, observacion):
+        # Toda la operación usa una sesión: si el State rechaza la transición, no se guarda nada
+        with ConexionBD().obtener_session() as session:
+            remito = self._obtener(session, id_remito)
+            getattr(remito, operacion)()
+            if observacion.strip():
+                remito.historial[-1].observacion = observacion.strip()[:200]
+
+    def _obtener(self, session, id_remito):
+        remito = RemitoDAO(session).obtener(id_remito)
+        if remito is None:
+            raise ReglaNegocioError(f"No se encontró un remito con id {id_remito}.")
+        return remito
