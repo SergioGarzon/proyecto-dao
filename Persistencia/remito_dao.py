@@ -10,3 +10,9 @@ class RemitoDAO(BaseDAO):
     def siguiente_numero(self, hoy):
         cantidad = self.session.query(Remito).count()
         return f"R-{hoy.year}-{cantidad + 1:05d}"
+
+    def listar_por_estado(self, estado=None):
+        consulta = self.session.query(Remito)
+        if estado:
+            consulta = consulta.filter(Remito.estado == estado)
+        return consulta.order_by(Remito.id_remito.desc()).all()
