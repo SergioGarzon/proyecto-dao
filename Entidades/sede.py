@@ -30,7 +30,7 @@ class Sede(Base):
             raise ReglaNegocioError(f"La sede {self.nombre} está dada de baja.")
 
     def dar_baja(self):
-        self.estado = EstadoSede.BAJA
+        self.estado = EstadoSede.INACTIVA
 
     def reactivar(self):
         self.estado = EstadoSede.ACTIVA

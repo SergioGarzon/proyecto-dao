@@ -35,7 +35,7 @@ class Multa(Base):
         fisico = detalle.estado_fisico_devolucion
         if fisico == EstadoFisico.DANADO:
             multas.append(cls(socio=socio, detalle=detalle, motivo=MotivoMulta.DANIO,
-                              monto=cls.MONTO_DANIO, fecha_generacion=fecha))
+                              monto=cls.MONTO_DANO, fecha_generacion=fecha))
         elif fisico in (EstadoFisico.DESTRUIDO, EstadoFisico.EXTRAVIADO):
             multas.append(cls(socio=socio, detalle=detalle, motivo=MotivoMulta.EXTRAVIO,
                               monto=cls.MONTO_EXTRAVIO, fecha_generacion=fecha))

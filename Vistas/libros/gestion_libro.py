@@ -140,6 +140,16 @@ class PantallaGestionLibro:
         )
         btn_gestion_ejemplares.pack(side="left", padx=10)
 
+        btn_disponibilidad = tk.Button(
+            frame_botones,
+            text="Revisar disponibilidad",
+            fg="white",
+            bg="purple",
+            font=("Arial", 15, "bold"),
+            command=self.revisar_disponibilidad
+        )
+        btn_disponibilidad.pack(side="left", padx=10)
+
         # Cerrar ventana
         tk.Button(
             frame,
@@ -235,6 +245,89 @@ class PantallaGestionLibro:
                 parent=self.windows_gestion_libro
             )
 
+
+    def revisar_disponibilidad(self):
+        # Obtener el libro seleccionado en la tabla
+        seleccion = self.tabla.selection()
+
+        if not seleccion:
+            messagebox.showwarning(
+                "Seleccionar libro",
+                "Primero seleccioná un libro de la tabla.",
+                parent=self.windows_gestion_libro
+            )
+            return
+
+        valores = self.tabla.item(seleccion[0], "values")
+        codigo, titulo = valores[0], valores[2]
+
+        try:
+            filas = self.controlador_libros.consultar_disponibilidad(codigo)
+        except Exception as error:
+            messagebox.showerror(
+                "Error",
+                str(error),
+                parent=self.windows_gestion_libro
+            )
+            return
+
+        if not filas:
+            messagebox.showinfo(
+                "Disponibilidad",
+                f"\"{titulo}\" no tiene ejemplares en sedes activas.",
+                parent=self.windows_gestion_libro
+            )
+            return
+
+        # Ventana con una fila por sede
+        ventana = tk.Toplevel(self.windows_gestion_libro)
+        ventana.title("Disponibilidad por sede")
+        ventana.configure(bg="lightyellow")
+        ventana.resizable(False, False)
+
+        tk.Label(
+            ventana,
+            text=titulo,
+            fg="blue",
+            bg="lightyellow",
+            font=("Arial", 16, "bold")
+        ).pack(padx=15, pady=10)
+
+        columnas = ("Sede", "Disponibles", "Total")
+        tabla = ttk.Treeview(
+            ventana,
+            columns=columnas,
+            show="headings",
+            height=min(len(filas), 10)
+        )
+
+        for columna, ancho in zip(columnas, (200, 100, 80)):
+            tabla.heading(columna, text=columna)
+            tabla.column(columna, width=ancho, anchor="center")
+
+        for fila in filas:
+            tabla.insert("", tk.END, values=fila)
+
+        tabla.pack(padx=15)
+
+        disponibles = sum(fila[1] for fila in filas)
+        total = sum(fila[2] for fila in filas)
+
+        tk.Label(
+            ventana,
+            text=f"{disponibles} disponibles de {total} ejemplares",
+            bg="lightyellow",
+            font=("Arial", 12)
+        ).pack(pady=10)
+
+        tk.Button(
+            ventana,
+            text="Cerrar",
+            fg="white",
+            bg="red",
+            font=("Arial", 12, "bold"),
+            command=ventana.destroy
+        ).pack(pady=(0, 10))
 
     # Cerrar
     def cerrar_ventana(self):
