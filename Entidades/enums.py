@@ -3,7 +3,7 @@ from enum import Enum
 
 class EstadoSede(Enum):
     ACTIVA = "Activa"
-    BAJA = "Baja"
+    INACTIVA = "Inactiva"
 
 
 class EstadoSocio(Enum):
