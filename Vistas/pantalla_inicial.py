@@ -12,6 +12,7 @@ from Vistas.gestion_remito import PantallaGestionRemito
 from Vistas.version.version_proyecto import main
 from Vistas.libros.gestion_libro import PantallaGestionLibro
 from Vistas.reservas.gestion_reserva import PantallaGestionReserva
+from Vistas.multas.gestion_multa import PantallaGestionMulta
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
@@ -84,7 +85,12 @@ class PantallaInicial:
         
         btn_reportes.config(fg="white", bg="violet", font=("Arial", 15, "bold"))
         btn_reportes.config(command=self.activar_ventana_reportes)
-                    
+
+        btn_gestion_multas = tk.Button(self.windows_inicial, text="Gestionar Multas", fg="white", bg="darkred",
+                                       font=("Arial", 15, "bold"), command=self.activar_ventana_gestion_multas)
+        if str(platform.system()) == "Windows":
+            btn_gestion_multas.config(cursor="Hand2")
+
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(current_dir)
         image_path = os.path.join(project_root, "Recursos", "biblioteca_utn_frc.png")
@@ -101,6 +107,7 @@ class PantallaInicial:
         btn_salir_sistema.pack()
         btn_reportes.pack()
         btn_gestion_remitos.pack()
+        btn_gestion_multas.pack()
         btn_gestion_sedes.pack(side="left")
         btn_gestion_socios.pack(side="right")
         btn_gestion_libros.pack(side="left")
@@ -125,6 +132,9 @@ class PantallaInicial:
 
     def activar_ventana_gestion_reservas(self):
         PantallaGestionReserva()
+
+    def activar_ventana_gestion_multas(self):
+        PantallaGestionMulta()
 
     def salir_sistema(self):
         self.windows_inicial.destroy()

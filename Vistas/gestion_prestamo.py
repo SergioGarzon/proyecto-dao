@@ -17,6 +17,8 @@ class PantallaGestionPrestamo:
         self.controlador_prestamos = ControladorPrestamo()
 
         self.windows_components()
+        # Al abrir, se inhabilita a los socios cuyos préstamos ya vencieron
+        self.procesar_vencimientos()
 
     def windows_properties(self):
         self.windows_gestion_prestamo.title("Proyecto DAO")
@@ -105,6 +107,13 @@ class PantallaGestionPrestamo:
         btn_nuevo_prestamo.pack(pady=5)
         btn_devolucion.pack(pady=5)
         btn_cerrar.pack()
+
+    def procesar_vencimientos(self):
+        inhabilitados = self.controlador_prestamos.procesar_vencimientos()
+        if inhabilitados:
+            messagebox.showinfo("Préstamos vencidos",
+                                f"Se inhabilitaron {inhabilitados} socio(s) por tener préstamos vencidos.",
+                                parent=self.windows_gestion_prestamo)
 
     def actualizar_tabla(self):
         self.mostrar_prestamos(self.controlador_prestamos.consultar_prestamos())

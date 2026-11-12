@@ -47,4 +47,9 @@ class Multa(Base):
     def pagar(self, fecha):
         if not self.esta_pendiente():
             raise ReglaNegocioError(f"La multa {self.id_multa} ya está pagada.")
+        if fecha < self.fecha_generacion:
+            raise ReglaNegocioError(f"La multa {self.id_multa} no se puede pagar antes de haberse generado.")
         self.fecha_pago = fecha
+
+    def estado_texto(self):
+        return "Pendiente" if self.esta_pendiente() else "Pagada"

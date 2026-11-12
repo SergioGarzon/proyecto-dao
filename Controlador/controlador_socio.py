@@ -1,5 +1,6 @@
 from datetime import date
 
+from Entidades.enums import EstadoSocio
 from Entidades.excepciones import ReglaNegocioError
 from Entidades.socio import Socio
 from Persistencia.conexion import ConexionBD
@@ -51,18 +52,15 @@ class ControladorSocio:
             for atributo, valor in datos.items():
                 setattr(socio, atributo, valor)
 
-    def habilitar_socio(self, legajo):
-        with ConexionBD().obtener_session() as session:
-            self._obtener_o_error(SocioDAO(session), legajo).habilitar()
-
-    def inhabilitar_socio(self, legajo):
-        with ConexionBD().obtener_session() as session:
-            self._obtener_o_error(SocioDAO(session), legajo).inhabilitar()
-
     def eliminar_socio(self, legajo):
-        # Baja lógica: el socio conserva su historial de préstamos y multas
+        # Baja lógica: el socio conserva su historial. No se permite con préstamos, multas o reservas pendientes
         with ConexionBD().obtener_session() as session:
             self._obtener_o_error(SocioDAO(session), legajo).dar_baja()
+
+    def dar_alta_socio(self, legajo, hoy=None):
+        # Reactiva a un socio dado de baja; su habilitación se vuelve a calcular según su deuda
+        with ConexionBD().obtener_session() as session:
+            self._obtener_o_error(SocioDAO(session), legajo).dar_alta(hoy or date.today())
 
     def _obtener_o_error(self, dao, legajo):
         legajo = self._convertir_legajo(legajo)
@@ -106,5 +104,8 @@ class ControladorSocio:
             raise ReglaNegocioError("El legajo debe ser un número.")
 
     def _a_fila(self, socio):
+        # Si está inhabilitado se muestra el motivo, por ejemplo "Inhabilitado (multas sin pagar)"
+        motivo = socio.motivo_inhabilitacion(date.today()) if socio.estado == EstadoSocio.INHABILITADO else None
+        estado = f"{socio.estado.value} ({motivo})" if motivo else socio.estado.value
         return (socio.legajo_dni, socio.nombre, socio.apellido, socio.fecha_inscripcion, socio.domicilio_calle,
-                socio.barrio, socio.localidad, socio.estado.value)
+                socio.barrio, socio.localidad, estado)
