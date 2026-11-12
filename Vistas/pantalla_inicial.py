@@ -9,6 +9,7 @@ from Vistas.socios.gestion_socio import PantallaGestionSocio
 from Vistas.reportes.reportes_generales import PantallaReportesGenerales
 from Vistas.gestion_prestamo import PantallaGestionPrestamo
 from Vistas.version.version_proyecto import main
+from Vistas.libros.gestion_libro import PantallaGestionLibro
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
@@ -60,7 +61,7 @@ class PantallaInicial:
         btn_gestion_socios.config(command=self.activar_ventana_gestion_socios) 
         
         btn_gestion_libros.config(fg="white", bg="black", font=("Arial", 15, "bold"))
-        btn_gestion_libros.config(command=self.mensaje_botones) 
+        btn_gestion_libros.config(command=self.activar_ventana_gestion_libros) 
         
         btn_gestion_prestamos.config(fg="white", bg="green", font=("Arial", 15, "bold"))
         btn_gestion_prestamos.config(command=self.activar_ventana_gestion_prestamos)
@@ -125,4 +126,5 @@ class PantallaInicial:
             self.windows_inicial.destroy()
             #quit()
             ft.run(main)
-        
+    def activar_ventana_gestion_libros(self):
+        PantallaGestionLibro()
