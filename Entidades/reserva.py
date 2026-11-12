@@ -12,6 +12,7 @@ class Reserva(Base):
     __tablename__ = "reservas"
 
     DIAS_RETIRO = 3
+    MAX_RESERVAS_VIGENTES = 3
 
     id_reserva = Column(Integer, primary_key=True)
     legajo_dni = Column(ForeignKey("socios.legajo_dni"), nullable=False)
@@ -38,9 +39,15 @@ class Reserva(Base):
         self.estado = EstadoReserva.ASIGNADA
         ejemplar.marcar_reservado()
 
-    def cumplir(self):
+    def esta_expirada(self, hoy):
+        return self.estado == EstadoReserva.ASIGNADA and self.fecha_expiracion < hoy
+
+    def cumplir(self, hoy):
         if self.estado != EstadoReserva.ASIGNADA:
             raise ReglaNegocioError(f"La reserva {self.id_reserva} no tiene un ejemplar asignado.")
+        if self.esta_expirada(hoy):
+            raise ReglaNegocioError(
+                f"La reserva {self.id_reserva} venció el {self.fecha_expiracion:%d/%m/%Y}: el ejemplar ya no está reservado.")
         self.estado = EstadoReserva.CUMPLIDA
         self._liberar_ejemplar()
 
@@ -58,3 +65,6 @@ class Reserva(Base):
     def _liberar_ejemplar(self):
         if self.ejemplar is not None:
             self.ejemplar.finalizar_retorno()
+
+    def __str__(self):
+        return f"Reserva {self.id_reserva} - {self.libro.titulo} para {self.socio}"

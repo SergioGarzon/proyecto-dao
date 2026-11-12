@@ -279,7 +279,7 @@ def crear_reservas(session, azar, hoy, sedes, libros, socios):
 
         reserva.asignar_ejemplar(disponibles[0], fecha)
         if desenlace == "cumplida":
-            reserva.cumplir()
+            reserva.cumplir(fecha)
         elif desenlace == "vencida":
             reserva.vencer(hoy)
 

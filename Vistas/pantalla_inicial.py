@@ -11,6 +11,7 @@ from Vistas.gestion_prestamo import PantallaGestionPrestamo
 from Vistas.gestion_remito import PantallaGestionRemito
 from Vistas.version.version_proyecto import main
 from Vistas.libros.gestion_libro import PantallaGestionLibro
+from Vistas.reservas.gestion_reserva import PantallaGestionReserva
 
 # Instalar PILLOW 'pip install pillow'
 from PIL import ImageTk, Image
@@ -70,7 +71,7 @@ class PantallaInicial:
         btn_gestion_prestamos.config(command=self.activar_ventana_gestion_prestamos)
         
         btn_gestion_reservas.config(fg="white", bg="pink", font=("Arial", 15, "bold"))
-        btn_gestion_reservas.config(command=self.mensaje_botones) 
+        btn_gestion_reservas.config(command=self.activar_ventana_gestion_reservas) 
         
         btn_gestion_devoluciones.config(fg="white", bg="orange", font=("Arial", 15, "bold"))
         btn_gestion_devoluciones.config(command=self.activar_ventana_gestion_prestamos)          
@@ -121,6 +122,9 @@ class PantallaInicial:
 
     def activar_ventana_gestion_remitos(self):
         PantallaGestionRemito()
+
+    def activar_ventana_gestion_reservas(self):
+        PantallaGestionReserva()
 
     def salir_sistema(self):
         self.windows_inicial.destroy()

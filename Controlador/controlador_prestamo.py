@@ -1,10 +1,8 @@
 from datetime import date
 
 from Entidades.enums import EstadoFisico, TipoPrestamo, TipoRemito
-from Entidades.multa import Multa
-
-from Entidades.enums import TipoPrestamo, TipoRemito
 from Entidades.excepciones import ReglaNegocioError
+from Entidades.multa import Multa
 from Entidades.prestamo import Prestamo
 from Entidades.remito import Remito
 from Persistencia.conexion import ConexionBD
@@ -54,42 +52,47 @@ class ControladorPrestamo:
 
         # Toda la operación usa una sesión: si algo falla, no queda nada guardado a medias
         with ConexionBD().obtener_session() as session:
-            socio = SocioDAO(session).obtener(legajo_dni)
-            if socio is None:
-                raise ReglaNegocioError(f"No se encontró un socio con legajo/dni {legajo_dni}.")
-            socio.validar_habilitado(hoy)
+            return self.crear_prestamo_en_sesion(session, legajo_dni, id_sede_origen, id_sede_destino,
+                                                 tipo, ejemplares, hoy)
 
-            sede_dao = SedeDAO(session)
-            sede_origen = sede_dao.obtener(id_sede_origen)
-            sede_destino = sede_dao.obtener(id_sede_destino)
-            if sede_origen is None or sede_destino is None:
-                raise ReglaNegocioError("No se encontró la sede de origen o de destino.")
+    def crear_prestamo_en_sesion(self, session, legajo_dni, id_sede_origen, id_sede_destino, tipo, ejemplares, hoy):
+        # Recibe la sesión de quien lo llama, así otro caso de uso (cumplir una reserva) comparte la transacción
+        socio = SocioDAO(session).obtener(legajo_dni)
+        if socio is None:
+            raise ReglaNegocioError(f"No se encontró un socio con legajo/dni {legajo_dni}.")
+        socio.validar_habilitado(hoy)
 
-            prestamo = Prestamo(socio=socio, sede_origen=sede_origen, sede_destino=sede_destino,
-                                tipo=TipoPrestamo(tipo), fecha_prestamo=hoy)
-            prestamo.validar_sedes()
-            PrestamoDAO(session).guardar(prestamo)
+        sede_dao = SedeDAO(session)
+        sede_origen = sede_dao.obtener(id_sede_origen)
+        sede_destino = sede_dao.obtener(id_sede_destino)
+        if sede_origen is None or sede_destino is None:
+            raise ReglaNegocioError("No se encontró la sede de origen o de destino.")
 
-            ejemplar_dao = EjemplarDAO(session)
-            lista_ejemplares = []
-            for id_ejemplar in ejemplares:
-                ejemplar = ejemplar_dao.obtener(id_ejemplar)
-                if ejemplar is None:
-                    raise ReglaNegocioError(f"No se encontró un ejemplar con id {id_ejemplar}.")
-                prestamo.agregar_ejemplar(ejemplar)
-                lista_ejemplares.append(ejemplar)
+        prestamo = Prestamo(socio=socio, sede_origen=sede_origen, sede_destino=sede_destino,
+                            tipo=TipoPrestamo(tipo), fecha_prestamo=hoy)
+        prestamo.validar_sedes()
+        PrestamoDAO(session).guardar(prestamo)
 
-            if prestamo.es_interbibliotecario():
-                for ejemplar in lista_ejemplares:
-                    ejemplar.preparar_envio()
-                remito_dao = RemitoDAO(session)
-                remito_dao.guardar(Remito(remito_dao.siguiente_numero(hoy), prestamo, sede_origen, sede_destino,
-                                          TipoRemito.IDA, lista_ejemplares, hoy))
-            else:
-                prestamo.activar(hoy)
+        ejemplar_dao = EjemplarDAO(session)
+        lista_ejemplares = []
+        for id_ejemplar in ejemplares:
+            ejemplar = ejemplar_dao.obtener(id_ejemplar)
+            if ejemplar is None:
+                raise ReglaNegocioError(f"No se encontró un ejemplar con id {id_ejemplar}.")
+            prestamo.agregar_ejemplar(ejemplar)
+            lista_ejemplares.append(ejemplar)
 
-            session.flush()  # Asigna el id para mostrarlo en pantalla
-            return prestamo.id_prestamo
+        if prestamo.es_interbibliotecario():
+            for ejemplar in lista_ejemplares:
+                ejemplar.preparar_envio()
+            remito_dao = RemitoDAO(session)
+            remito_dao.guardar(Remito(remito_dao.siguiente_numero(hoy), prestamo, sede_origen, sede_destino,
+                                      TipoRemito.IDA, lista_ejemplares, hoy))
+        else:
+            prestamo.activar(hoy)
+
+        session.flush()  # Asigna el id para mostrarlo en pantalla
+        return prestamo.id_prestamo
 
     def obtener_prestamo(self, session, id_prestamo):
             prestamo = PrestamoDAO(session).obtener(id_prestamo)
