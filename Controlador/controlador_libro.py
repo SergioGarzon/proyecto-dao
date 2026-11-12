@@ -49,6 +49,24 @@ class ControladorLibro:
 
             return self._a_fila(libro)
 
+    def consultar_disponibilidad(self, codigo):
+        # Cuántos ejemplares disponibles tiene el libro en cada sede activa
+        try:
+            codigo = int(codigo)
+        except (ValueError, TypeError):
+            raise ReglaNegocioError("Debe seleccionar un libro válido.")
+
+        with ConexionBD().obtener_session() as session:
+            libro = LibroDAO(session).obtener(codigo)
+
+            if libro is None:
+                raise ReglaNegocioError("No se encontró el libro.")
+
+            return [
+                (sede.nombre, disponibles, total)
+                for sede, disponibles, total in libro.disponibilidad_por_sede()
+            ]
+
     def modificar_libro(self, codigo, isbn, titulo, autor, editorial, anio):
         isbn, titulo, autor, editorial, anio = self._validar_datos(
             isbn, titulo, autor, editorial, anio

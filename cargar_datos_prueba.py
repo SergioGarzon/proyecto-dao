@@ -30,7 +30,7 @@ SEDES = [
     ("Sede Este", "Av. Sabattini 2500", "Empalme", "Córdoba", EstadoSede.ACTIVA),
     ("Sede Oeste", "Av. Fuerza Aérea 3100", "Alto Alberdi", "Córdoba", EstadoSede.ACTIVA),
     ("Sede Carlos Paz", "Av. San Martín 800", "Centro", "Villa Carlos Paz", EstadoSede.ACTIVA),
-    ("Sede Sur", "Av. Vélez Sarsfield 3100", "Jardín", "Córdoba", EstadoSede.BAJA),
+    ("Sede Sur", "Av. Vélez Sarsfield 3100", "Jardín", "Córdoba", EstadoSede.INACTIVA),
 ]
 
 LIBROS = [
