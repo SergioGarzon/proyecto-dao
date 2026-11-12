@@ -98,7 +98,9 @@ class InsercionPrestamos:
         self.socios = self.controlador_prestamos.listar_socios_activos()
         self.combo_socio["values"] = [f"{legajo} - {apellido}, {nombre}" for legajo, nombre, apellido in self.socios]
 
-        sedes = [str(fila[0]) for fila in self.controlador_prestamos.listar_sedes_activas()]
+        # Sedes: se muestra "id - Nombre" y el id se toma por posición en self.sedes
+        self.sedes = self.controlador_prestamos.listar_sedes_activas()
+        sedes = [f"{id_sede} - {nombre}" for id_sede, nombre in self.sedes]
         self.combo_sede_origen["values"] = sedes
         self.combo_sede_destino["values"] = sedes
 
@@ -107,21 +109,29 @@ class InsercionPrestamos:
     def al_cambiar_tipo(self, event=None):
         # En un préstamo local la sede de destino es siempre la de origen
         if self.combo_tipo.get() == "Local":
-            self.combo_sede_destino.set(self.combo_sede_origen.get())
+            self.copiar_sede_origen()
             self.combo_sede_destino.config(state="disabled")
         else:
             self.combo_sede_destino.config(state="readonly")
             self.combo_sede_destino.set("")
 
+    def copiar_sede_origen(self):
+        # En un préstamo local la sede de destino es la misma que la de origen
+        if self.combo_sede_origen.current() >= 0:
+            self.combo_sede_destino.current(self.combo_sede_origen.current())
+        else:
+            self.combo_sede_destino.set("")
+
     def al_cambiar_sede_origen(self, event=None):
         if self.combo_tipo.get() == "Local":
-            self.combo_sede_destino.set(self.combo_sede_origen.get())
+            self.copiar_sede_origen()
 
         # Solo se muestran los ejemplares disponibles de la sede de origen elegida
         self.lista_ejemplares.delete(0, tk.END)
-        self.ejemplares_disponibles = self.controlador_prestamos.listar_ejemplares_disponibles(int(self.combo_sede_origen.get()))
-        for id_ejemplar, codigo_libro in self.ejemplares_disponibles:
-            self.lista_ejemplares.insert(tk.END, f"Ejemplar {id_ejemplar} (libro {codigo_libro})")
+        id_sede_origen = self.sedes[self.combo_sede_origen.current()][0]
+        self.ejemplares_disponibles = self.controlador_prestamos.listar_ejemplares_disponibles(id_sede_origen)
+        for _, codigo_inventario, titulo in self.ejemplares_disponibles:
+            self.lista_ejemplares.insert(tk.END, f"{codigo_inventario} - {titulo}")
 
     def cerrar_ventana(self):
         self.windows_insercion_prestamo.destroy()
@@ -132,8 +142,8 @@ class InsercionPrestamos:
             return
 
         legajo = self.socios[self.combo_socio.current()][0]
-        id_sede_origen = int(self.combo_sede_origen.get())
-        id_sede_destino = int(self.combo_sede_destino.get())
+        id_sede_origen = self.sedes[self.combo_sede_origen.current()][0]
+        id_sede_destino = self.sedes[self.combo_sede_destino.current()][0]
         tipo = self.combo_tipo.get()
         ids_ejemplares = [self.ejemplares_disponibles[i][0] for i in self.lista_ejemplares.curselection()]
 

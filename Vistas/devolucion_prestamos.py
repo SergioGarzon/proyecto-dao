@@ -32,7 +32,8 @@ class DevolucionPrestamos:
         frame_8 = tk.Frame(self.windows_devolucion)
         frame_8.configure(bg="lightyellow")
 
-        label_name_form = tk.Label(frame_8, text=f"Devolución del préstamo N° {self.id_prestamo}")
+        encabezado = self.controlador_prestamos.consultar_encabezado(self.id_prestamo)
+        label_name_form = tk.Label(frame_8, text=f"Devolución del préstamo {encabezado}")
 
         label_ejemplares = tk.Label(frame_8, text="Seleccione los ejemplares (clic para marcar o desmarcar):")
         self.lista_ejemplares = tk.Listbox(frame_8, font=("Arial", 14), width=50, height=6, selectmode=tk.MULTIPLE)
@@ -81,14 +82,14 @@ class DevolucionPrestamos:
 
     def mostrar_pendientes(self):
         self.lista_ejemplares.delete(0, tk.END)
-        for _, id_ejemplar, _, titulo, fisico_salida in self.pendientes:
-            self.lista_ejemplares.insert(tk.END, f"Ejemplar {id_ejemplar} - {titulo} (salió {fisico_salida})")
+        for _, _, codigo_inventario, titulo, fisico_salida in self.pendientes:
+            self.lista_ejemplares.insert(tk.END, f"{codigo_inventario} - {titulo} (salió {fisico_salida})")
 
         # Un Listbox deshabilitado no acepta cambios: se habilita solo para cargarlo
         self.lista_devueltos.config(state="normal")
         self.lista_devueltos.delete(0, tk.END)
-        for id_ejemplar, titulo, fecha, fisico in self.controlador_prestamos.consultar_devueltos(self.id_prestamo):
-            self.lista_devueltos.insert(tk.END, f"Ejemplar {id_ejemplar} - {titulo} ({fecha}, {fisico})")
+        for codigo_inventario, titulo, fecha, fisico in self.controlador_prestamos.consultar_devueltos(self.id_prestamo):
+            self.lista_devueltos.insert(tk.END, f"{codigo_inventario} - {titulo} ({fecha}, {fisico})")
         self.lista_devueltos.config(state="disabled")
 
     def confirmar_devolucion(self):

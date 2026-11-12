@@ -15,16 +15,38 @@ from Persistencia.socio_dao import SocioDAO
 
 class ControladorPrestamo:
 
+    # Campos por los que se puede buscar en la pantalla de préstamos: texto del combo -> campo del DAO
+    CAMPOS_BUSQUEDA = {
+        "N° préstamo": "numero",
+        "Socio (nombre o legajo)": "socio",
+        "Libro": "libro",
+        "Sede": "sede",
+        "Estado": "estado",
+    }
+
     # Consultas para cargar las pantallas
     def consultar_prestamos(self):
         with ConexionBD().obtener_session() as session:
-            filas = []
-            for prestamo in PrestamoDAO(session).listar_recientes():
-                ejemplares = ", ".join(str(detalle.id_ejemplar) for detalle in prestamo.detalles)
-                filas.append((prestamo.id_prestamo, prestamo.legajo_dni, prestamo.id_sede_origen,
-                              prestamo.id_sede_destino, prestamo.tipo.value, prestamo.fecha_prestamo,
-                              prestamo.fecha_vencimiento, prestamo.estado.value, ejemplares))
-            return filas
+            return [self._a_fila(prestamo) for prestamo in PrestamoDAO(session).listar_recientes()]
+
+    def buscar_prestamos(self, campo, texto):
+        if campo not in self.CAMPOS_BUSQUEDA:
+            raise ReglaNegocioError("Debe elegir un campo de búsqueda válido.")
+        texto = (texto or "").strip()
+        if not texto:
+            return self.consultar_prestamos()
+
+        campo = self.CAMPOS_BUSQUEDA[campo]
+        if campo == "numero" and not texto.isdecimal():
+            raise ReglaNegocioError("El número de préstamo debe ser un número.")
+
+        with ConexionBD().obtener_session() as session:
+            return [self._a_fila(prestamo) for prestamo in PrestamoDAO(session).buscar(campo, texto)]
+
+    def consultar_encabezado(self, id_prestamo):
+        with ConexionBD().obtener_session() as session:
+            prestamo = self.obtener_prestamo(session, id_prestamo)
+            return f"N° {prestamo.id_prestamo} - {prestamo.socio.apellido}, {prestamo.socio.nombre}"
 
     def listar_socios_activos(self):
         with ConexionBD().obtener_session() as session:
@@ -33,11 +55,11 @@ class ControladorPrestamo:
 
     def listar_sedes_activas(self):
         with ConexionBD().obtener_session() as session:
-            return [(sede.id_sede,) for sede in SedeDAO(session).listar_activas()]
+            return [(sede.id_sede, sede.nombre) for sede in SedeDAO(session).listar_activas()]
 
     def listar_ejemplares_disponibles(self, id_sede):
         with ConexionBD().obtener_session() as session:
-            return [(ejemplar.id_ejemplar, ejemplar.codigo_libro)
+            return [(ejemplar.id_ejemplar, ejemplar.codigo_inventario, ejemplar.libro.titulo)
                     for ejemplar in EjemplarDAO(session).disponibles_por_sede(id_sede)]
 
     def registrar_prestamo(self, legajo_dni, id_sede_origen, id_sede_destino, tipo, ejemplares, hoy=None):
@@ -108,14 +130,14 @@ class ControladorPrestamo:
 
             for detalle in prestamo.detalles:
                 if not detalle.fue_devuelto():
-                    pendientes.append((detalle.id_detalle, detalle.id_ejemplar, detalle.ejemplar.codigo_libro, detalle.ejemplar.libro.titulo,
-                                       detalle.estado_fisico_salida.value))
+                    pendientes.append((detalle.id_detalle, detalle.id_ejemplar, detalle.ejemplar.codigo_inventario,
+                                       detalle.ejemplar.libro.titulo, detalle.estado_fisico_salida.value))
             return pendientes
 
     def consultar_devueltos(self, id_prestamo):
         with ConexionBD().obtener_session() as session:
             prestamo = self.obtener_prestamo(session, id_prestamo)
-            return [(detalle.id_ejemplar, detalle.ejemplar.libro.titulo, detalle.fecha_devolucion,
+            return [(detalle.ejemplar.codigo_inventario, detalle.ejemplar.libro.titulo, detalle.fecha_devolucion,
                      detalle.estado_fisico_devolucion.value)
                     for detalle in prestamo.detalles if detalle.fue_devuelto()]
 
@@ -148,3 +170,10 @@ class ControladorPrestamo:
 
             prestamo.verificar_cierre()
             return sum(multa.monto for multa in multas)  # Devuelve el total de multas generadas
+
+    def _a_fila(self, prestamo):
+        socio = prestamo.socio
+        libros = ", ".join(detalle.ejemplar.libro.titulo for detalle in prestamo.detalles)
+        return (prestamo.id_prestamo, f"{socio.legajo_dni} - {socio.apellido}, {socio.nombre}",
+                prestamo.sede_origen.nombre, prestamo.sede_destino.nombre, prestamo.tipo.value,
+                prestamo.fecha_prestamo, prestamo.fecha_vencimiento, prestamo.estado.value, libros)
