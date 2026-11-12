@@ -8,13 +8,19 @@ from Entidades.excepciones import ReglaNegocioError
 
 class InsercionSocios:
     
-    def __init__(self):
+    def __init__(self, al_guardar=None, datos=None):
         self.windows_insercion_socio = tk.Toplevel() 
         self.windows_properties()
         
         self.controlador_socios = ControladorSocio()
+        # Con datos, el formulario edita un socio existente; sin datos, da de alta uno nuevo
+        self.datos = datos
+        # Función que se llama después de guardar (para refrescar la tabla de gestión)
+        self.al_guardar = al_guardar
         
-        self.windows_components()    
+        self.windows_components()
+        if self.datos:
+            self.precargar_datos()
     
     def windows_properties(self):
         self.windows_insercion_socio.title("Proyecto DAO")
@@ -24,9 +30,11 @@ class InsercionSocios:
         
     def windows_components(self):
         frame_5 = tk.Frame(self.windows_insercion_socio)   
+        datos_edicion = self.datos is not None
+        texto_confirmar = "Guardar cambios" if datos_edicion else "Confirmar creación"
         frame_5.configure(bg="lightyellow") 
             
-        label_name_form = tk.Label(frame_5, text="Creacion de Socios")
+        label_name_form = tk.Label(frame_5, text="Modificación de Socio" if datos_edicion else "Creacion de Socios")
         
         label_legajo = tk.Label(frame_5, text="Ingrese el legajo:")
         self.textbox_legajo_socio = tk.Entry(frame_5, font=("Arial", 14), width=30)
@@ -58,7 +66,7 @@ class InsercionSocios:
             label_domicilio.config(fg="black", bg="lightyellow", font=("Arial", 15))  
             label_barrio.config(fg="black", bg="lightyellow", font=("Arial", 15))  
             label_localidad.config(fg="black", bg="lightyellow", font=("Arial", 15)) 
-            btn_insertar_datos = tk.Button(frame_5, text="Confirmar creación", cursor="Hand2")   
+            btn_insertar_datos = tk.Button(frame_5, text=texto_confirmar, cursor="Hand2")   
             btn_cerrar = tk.Button(frame_5, text="Cerrar ventana", cursor="Hand2")              
         else:    
             label_name_form.config(fg="blue", bg="lightyellow")    
@@ -69,7 +77,7 @@ class InsercionSocios:
             label_domicilio.config(fg="black", bg="lightyellow")
             label_barrio.config(fg="black", bg="lightyellow")
             label_localidad.config(fg="black", bg="lightyellow")
-            btn_insertar_datos = tk.Button(frame_5, text="Confirmar creación")
+            btn_insertar_datos = tk.Button(frame_5, text=texto_confirmar)
             btn_cerrar = tk.Button(frame_5, text="Cerrar ventana")                   
             
         btn_cerrar.config(fg="white", bg="red", font=("Arial", 15, "bold"))  
@@ -101,33 +109,46 @@ class InsercionSocios:
     def cerrar_ventana(self):
         self.windows_insercion_socio.destroy()
 
+    def precargar_datos(self):
+        campos = ((self.textbox_legajo_socio, "legajo"), (self.textbox_nombre_socio, "nombre"),
+                  (self.textbox_apellido_socio, "apellido"), (self.textbox_fecha_inscripcion, "fecha"),
+                  (self.textbox_domicilio, "domicilio"), (self.textbox_barrio, "barrio"),
+                  (self.textbox_localidad, "localidad"))
+        for textbox, clave in campos:
+            textbox.insert(0, self.datos[clave])
+        # El legajo es la clave del socio: no se puede cambiar
+        self.textbox_legajo_socio.config(state="disabled")
+
     def insertar_socio(self):
         legajo = self.textbox_legajo_socio.get()
-        nombre = self.textbox_nombre_socio.get()
-        apellido = self.textbox_apellido_socio.get()
-        fecha = self.textbox_fecha_inscripcion.get()
-        domicilio = self.textbox_domicilio.get()
-        barrio = self.textbox_barrio.get()
-        localidad = self.textbox_localidad.get()
-        
-        if str(legajo) != "" and str(nombre) != "" and str(apellido) != "" and str(fecha) != "" and str(domicilio) != "" and str(barrio) != "" and str(localidad) != "":
-            
-            try:
-                self.controlador_socios.insertar_socio(legajo, nombre, apellido, fecha, domicilio, barrio, localidad)
-            except ReglaNegocioError as error:
-                messagebox.showerror("Error", str(error))
-                return
+        valores = (self.textbox_nombre_socio.get(), self.textbox_apellido_socio.get(),
+                   self.textbox_fecha_inscripcion.get(), self.textbox_domicilio.get(),
+                   self.textbox_barrio.get(), self.textbox_localidad.get())
 
-            messagebox.showinfo("Información", "Socio insertado correctamente!")
-        
-            self.textbox_legajo_socio.delete(0, tk.END)
-            self.textbox_nombre_socio.delete(0, tk.END)
-            self.textbox_apellido_socio.delete(0, tk.END)
-            self.textbox_fecha_inscripcion.delete(0, tk.END)
-            self.textbox_domicilio.delete(0, tk.END)
-            self.textbox_barrio.delete(0, tk.END)
-            self.textbox_localidad.delete(0, tk.END)
-        else:
-            messagebox.showerror("Error", "Faltan llenar datos! No se puede insertar ningun usuario")
-    
-    
+        if not str(legajo).strip() or any(not str(valor).strip() for valor in valores):
+            messagebox.showerror("Error", "Faltan llenar datos! No se puede guardar el socio",
+                                 parent=self.windows_insercion_socio)
+            return
+
+        try:
+            if self.datos:
+                self.controlador_socios.modificar_socio(legajo, *valores)
+            else:
+                self.controlador_socios.insertar_socio(legajo, *valores)
+        except ReglaNegocioError as error:
+            messagebox.showerror("Error", str(error), parent=self.windows_insercion_socio)
+            return
+
+        if self.al_guardar:
+            self.al_guardar()
+
+        if self.datos:
+            messagebox.showinfo("Información", "Socio modificado correctamente!", parent=self.windows_insercion_socio)
+            self.cerrar_ventana()
+            return
+
+        messagebox.showinfo("Información", "Socio insertado correctamente!", parent=self.windows_insercion_socio)
+        for textbox in (self.textbox_legajo_socio, self.textbox_nombre_socio, self.textbox_apellido_socio,
+                        self.textbox_fecha_inscripcion, self.textbox_domicilio, self.textbox_barrio,
+                        self.textbox_localidad):
+            textbox.delete(0, tk.END)

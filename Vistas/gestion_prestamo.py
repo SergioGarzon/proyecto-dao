@@ -20,7 +20,7 @@ class PantallaGestionPrestamo:
 
     def windows_properties(self):
         self.windows_gestion_prestamo.title("Proyecto DAO")
-        self.windows_gestion_prestamo.geometry("1000x650")
+        self.windows_gestion_prestamo.geometry("1300x700")
         self.windows_gestion_prestamo.configure(bg="lightyellow")
         self.windows_gestion_prestamo.resizable(False, False)
 
@@ -48,24 +48,24 @@ class PantallaGestionPrestamo:
         self.tabla = ttk.Treeview(frame_6, columns=columnas, show="headings")
 
         self.tabla.heading("Id", text="N° Préstamo")
-        self.tabla.heading("Socio", text="Legajo Socio")
+        self.tabla.heading("Socio", text="Socio")
         self.tabla.heading("Sede_Origen", text="Sede Origen")
         self.tabla.heading("Sede_Destino", text="Sede Destino")
         self.tabla.heading("Tipo", text="Tipo")
         self.tabla.heading("Fecha_Prestamo", text="Fecha Préstamo")
         self.tabla.heading("Fecha_Devolucion", text="Vencimiento")
         self.tabla.heading("Estado", text="Estado")
-        self.tabla.heading("Ejemplares", text="Ejemplares")
+        self.tabla.heading("Ejemplares", text="Libros")
 
         self.tabla.column("Id", width=80, anchor="center")
-        self.tabla.column("Socio", width=90, anchor="center")
-        self.tabla.column("Sede_Origen", width=90, anchor="center")
-        self.tabla.column("Sede_Destino", width=90, anchor="center")
+        self.tabla.column("Socio", width=200, anchor="w")
+        self.tabla.column("Sede_Origen", width=130, anchor="center")
+        self.tabla.column("Sede_Destino", width=130, anchor="center")
         self.tabla.column("Tipo", width=130, anchor="center")
         self.tabla.column("Fecha_Prestamo", width=110, anchor="center")
         self.tabla.column("Fecha_Devolucion", width=110, anchor="center")
         self.tabla.column("Estado", width=90, anchor="center")
-        self.tabla.column("Ejemplares", width=150, anchor="center")
+        self.tabla.column("Ejemplares", width=260, anchor="w")
 
         # Traemos los datos de la base de datos
         self.actualizar_tabla()
@@ -82,19 +82,51 @@ class PantallaGestionPrestamo:
         btn_cerrar.config(fg="white", bg="red", font=("Arial", 15, "bold"))
         btn_cerrar.config(command=self.cerrar_ventana)
 
+        # Búsqueda: se elige un campo y se escribe el texto a buscar
+        frame_busqueda = tk.Frame(frame_6, bg="lightyellow")
+        tk.Label(frame_busqueda, text="Buscar por:", bg="lightyellow", font=("Arial", 13)).pack(side="left", padx=5)
+        self.combo_campo = ttk.Combobox(frame_busqueda, state="readonly", width=22, font=("Arial", 12),
+                                        values=list(ControladorPrestamo.CAMPOS_BUSQUEDA))
+        self.combo_campo.current(0)
+        self.combo_campo.pack(side="left", padx=5)
+        self.textbox_buscar = tk.Entry(frame_busqueda, font=("Arial", 13), width=30)
+        self.textbox_buscar.bind("<Return>", lambda evento: self.buscar_prestamos())
+        self.textbox_buscar.pack(side="left", padx=5)
+        tk.Button(frame_busqueda, text="Buscar", fg="white", bg="blue", font=("Arial", 12, "bold"),
+                  command=self.buscar_prestamos).pack(side="left", padx=5)
+        tk.Button(frame_busqueda, text="Limpiar", fg="white", bg="gray", font=("Arial", 12, "bold"),
+                  command=self.limpiar_busqueda).pack(side="left", padx=5)
+
         frame_6.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         label_name_form.pack(pady=5)
         btn_actualizar.pack(pady=5)
+        frame_busqueda.pack(pady=5)
         self.tabla.pack(fill=tk.BOTH, expand=True, pady=15)
         btn_nuevo_prestamo.pack(pady=5)
         btn_devolucion.pack(pady=5)
         btn_cerrar.pack()
 
     def actualizar_tabla(self):
+        self.mostrar_prestamos(self.controlador_prestamos.consultar_prestamos())
+
+    def buscar_prestamos(self):
+        try:
+            resultados = self.controlador_prestamos.buscar_prestamos(self.combo_campo.get(), self.textbox_buscar.get())
+        except ReglaNegocioError as error:
+            messagebox.showerror("Búsqueda inválida", str(error), parent=self.windows_gestion_prestamo)
+            return
+
+        self.mostrar_prestamos(resultados)
+        if not resultados:
+            messagebox.showinfo("Sin resultados", "No se encontraron préstamos.", parent=self.windows_gestion_prestamo)
+
+    def limpiar_busqueda(self):
+        self.textbox_buscar.delete(0, tk.END)
+        self.actualizar_tabla()
+
+    def mostrar_prestamos(self, lista_resultados):
         for elemento in self.tabla.get_children():
             self.tabla.delete(elemento)
-
-        lista_resultados = self.controlador_prestamos.consultar_prestamos()
 
         for fila in lista_resultados:
             # Mostramos un guion en vez de "None" cuando todavía no hay fecha de devolución

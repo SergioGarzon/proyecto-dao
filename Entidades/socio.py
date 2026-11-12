@@ -38,9 +38,14 @@ class Socio(Base):
     def inhabilitar(self):
         if self.estado == EstadoSocio.BAJA:
             raise ReglaNegocioError("No se puede inhabilitar un socio dado de baja.")
+        if self.estado == EstadoSocio.INHABILITADO:
+            raise ReglaNegocioError(f"El socio {self.legajo_dni} ya está inhabilitado.")
         self.estado = EstadoSocio.INHABILITADO
 
     def habilitar(self):
+        # Sirve tanto para levantar una inhabilitación como para reactivar una baja lógica
+        if self.estado == EstadoSocio.ACTIVO:
+            raise ReglaNegocioError(f"El socio {self.legajo_dni} ya está habilitado.")
         self.estado = EstadoSocio.ACTIVO
 
     def dar_baja(self):

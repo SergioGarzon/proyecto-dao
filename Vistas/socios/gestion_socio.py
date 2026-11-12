@@ -19,7 +19,7 @@ class PantallaGestionSocio:
     
     def windows_properties(self):
         self.windows_gestion_socio.title("Proyecto DAO")
-        self.windows_gestion_socio.geometry("800x650")
+        self.windows_gestion_socio.geometry("1000x650")
         self.windows_gestion_socio.configure(bg="lightyellow")
         self.windows_gestion_socio.resizable(False, False)
         
@@ -37,7 +37,7 @@ class PantallaGestionSocio:
             btn_buscar_socio = tk.Button(frame_4, text="Buscar socio", cursor="Hand2")                                      
             btn_actualizar = tk.Button(frame_4, text="Actualizar tabla de socios", cursor="Hand2")
             btn_insertar_datos_socios = tk.Button(frame_4, text="Crear socios", cursor="Hand2") 
-            btn_eliminar_socio = tk.Button(frame_4, text="Eliminar socios", cursor="Hand2")
+            btn_eliminar_socio = tk.Button(frame_4, text="Dar de baja", cursor="Hand2")
             btn_cerrar = tk.Button(frame_4, text="Cerrar ventana", cursor="Hand2") 
         else:    
             label_name_form.config(fg="blue", bg="lightyellow")
@@ -45,7 +45,7 @@ class PantallaGestionSocio:
             btn_buscar_socio = tk.Button(frame_4, text="Buscar socio") 
             btn_actualizar = tk.Button(frame_4, text="Actualizar tabla de socios")  
             btn_insertar_datos_socios = tk.Button(frame_4, text="Crear socios") 
-            btn_eliminar_socio = tk.Button(frame_4, text="Eliminar socios")
+            btn_eliminar_socio = tk.Button(frame_4, text="Dar de baja")
             btn_cerrar = tk.Button(frame_4, text="Cerrar ventana")          
         
         btn_buscar_socio.config(fg="white", bg="blue", font=("Arial", 15, "bold"))  
@@ -87,6 +87,15 @@ class PantallaGestionSocio:
         
         btn_cerrar.config(fg="white", bg="red", font=("Arial", 15, "bold"))  
         btn_cerrar.config(command=self.cerrar_ventana)  
+
+        # Botones que actúan sobre el socio seleccionado en la tabla
+        cursor = "hand2" if str(platform.system()) == "Windows" else ""
+        btn_modificar_socio = tk.Button(frame_4, text="Modificar socio", fg="white", bg="blue",
+                                        font=("Arial", 15, "bold"), cursor=cursor, command=self.modificar_socio)
+        btn_habilitar_socio = tk.Button(frame_4, text="Habilitar", fg="white", bg="teal",
+                                        font=("Arial", 15, "bold"), cursor=cursor, command=self.habilitar_socio)
+        btn_inhabilitar_socio = tk.Button(frame_4, text="Inhabilitar", fg="white", bg="purple",
+                                          font=("Arial", 15, "bold"), cursor=cursor, command=self.inhabilitar_socio)
                 
         frame_4.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         label_name_form.pack(pady=5)
@@ -95,8 +104,11 @@ class PantallaGestionSocio:
         btn_buscar_socio.pack(pady=5) 
         btn_actualizar.pack(pady=5)
         self.tabla.pack(fill=tk.BOTH, expand=True, pady=15)
-        btn_eliminar_socio.pack(pady=10, side="right")
-        btn_insertar_datos_socios.pack(pady=10, side="right")
+        btn_eliminar_socio.pack(pady=10, padx=4, side="right")
+        btn_inhabilitar_socio.pack(pady=10, padx=4, side="right")
+        btn_habilitar_socio.pack(pady=10, padx=4, side="right")
+        btn_modificar_socio.pack(pady=10, padx=4, side="right")
+        btn_insertar_datos_socios.pack(pady=10, padx=4, side="right")
         btn_cerrar.pack(side="left")
                 
     #  Metodo para consultar datos
@@ -118,22 +130,22 @@ class PantallaGestionSocio:
         
     # Metodo para el boton de insertar nuevo socio, nos va a derivar al nuevo formulario
     def insertar_informacion(self):
-        InsercionSocios()
+        InsercionSocios(al_guardar=self.actualizar_tabla)
         
     # Metodo para el boton que busca socio por medio de un legajo ingresado    
     def mostrar_datos_tabla_filtrada_nro_socio(self):        
         if str(self.textbox_legajo_socio.get()) == "":
-            messagebox.showerror("Error", "No se ha insertado el legajo del socio a buscar!")
+            messagebox.showerror("Error", "No se ha insertado el legajo del socio a buscar!", parent=self.windows_gestion_socio)
             return
                     
         try:
             lista_resultados = self.controlador_socios.buscar_socio(self.textbox_legajo_socio.get())
         except ReglaNegocioError as error:
-            messagebox.showerror("Error", str(error))
+            messagebox.showerror("Error", str(error), parent=self.windows_gestion_socio)
             return
 
         if len(lista_resultados) == 0:
-            messagebox.showwarning("Advertencia", "No se han encontrado socios con dicho legajo")
+            messagebox.showwarning("Advertencia", "No se han encontrado socios con dicho legajo", parent=self.windows_gestion_socio)
         else:
             for elemento in self.tabla.get_children():
                         self.tabla.delete(elemento)
@@ -141,25 +153,51 @@ class PantallaGestionSocio:
             for fila in lista_resultados:
                 self.tabla.insert("", tk.END, values=fila)     
     
-    # Metodo para eliminar los datos del socio
-    def eliminar_socio(self):
+    def legajo_seleccionado(self):
         seleccion = self.tabla.selection()
-    
-        if not seleccion:        
-            messagebox.showwarning("Advertencia", "Por favor, selecciona una fila de la tabla.")
-        else:
-            id_fila = seleccion[0]
-            valores = self.tabla.item(id_fila, "values")              
-            
-            value_confirm = str(messagebox.askquestion(message=f"Estas seguro que deseas eliminar al socio con legajo {valores[0]}?", title="Confirme"))
-                    
-            if value_confirm == "yes":
-                self.controlador_socios.eliminar_socio(valores[0])
-                messagebox.showinfo("Éxito", "Socio dado de baja correctamente")
-                self.actualizar_tabla()
-                
-                    
-        
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Por favor, selecciona una fila de la tabla.",
+                                   parent=self.windows_gestion_socio)
+            return None
+        return self.tabla.item(seleccion[0], "values")[0]
+
+    # Metodo para modificar los datos del socio seleccionado
+    def modificar_socio(self):
+        legajo = self.legajo_seleccionado()
+        if legajo is None:
+            return
+        try:
+            datos = self.controlador_socios.obtener_socio(legajo)
+        except ReglaNegocioError as error:
+            messagebox.showerror("Error", str(error), parent=self.windows_gestion_socio)
+            return
+        InsercionSocios(al_guardar=self.actualizar_tabla, datos=datos)
+
+    # Metodos para habilitar, inhabilitar y dar de baja: comparten la confirmación y el manejo de errores
+    def habilitar_socio(self):
+        self.cambiar_estado(self.controlador_socios.habilitar_socio, "habilitar", "habilitado")
+
+    def inhabilitar_socio(self):
+        self.cambiar_estado(self.controlador_socios.inhabilitar_socio, "inhabilitar", "inhabilitado")
+
+    def eliminar_socio(self):
+        self.cambiar_estado(self.controlador_socios.eliminar_socio, "dar de baja", "dado de baja")
+
+    def cambiar_estado(self, operacion, accion, resultado):
+        legajo = self.legajo_seleccionado()
+        if legajo is None:
+            return
+        if not messagebox.askyesno("Confirme", f"¿Estás seguro que deseas {accion} al socio con legajo {legajo}?",
+                                   parent=self.windows_gestion_socio):
+            return
+        try:
+            operacion(legajo)
+        except ReglaNegocioError as error:
+            messagebox.showerror("Error", str(error), parent=self.windows_gestion_socio)
+            return
+        messagebox.showinfo("Éxito", f"Socio {resultado} correctamente.", parent=self.windows_gestion_socio)
+        self.actualizar_tabla()
+
     # Metodo para el boton que cierra la ventana
     def cerrar_ventana(self):
         self.windows_gestion_socio.destroy()
