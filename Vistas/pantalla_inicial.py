@@ -8,6 +8,7 @@ from Vistas.sedes.gestion_sede import PantallaGestionSede
 from Vistas.socios.gestion_socio import PantallaGestionSocio
 from Vistas.reportes.reportes_generales import PantallaReportesGenerales
 from Vistas.gestion_prestamo import PantallaGestionPrestamo
+from Vistas.gestion_remito import PantallaGestionRemito
 from Vistas.version.version_proyecto import main
 from Vistas.libros.gestion_libro import PantallaGestionLibro
 
@@ -41,6 +42,7 @@ class PantallaInicial:
             btn_gestion_prestamos = tk.Button(self.windows_inicial, text="Gestionar Prestamos", cursor="Hand2")
             btn_gestion_reservas = tk.Button(self.windows_inicial, text="Gestionar Reservas", cursor="Hand2")
             btn_gestion_devoluciones = tk.Button(self.windows_inicial, text="Gestionar Devoluciones", cursor="Hand2")
+            btn_gestion_remitos = tk.Button(self.windows_inicial, text="Gestionar Remitos y Envíos", cursor="Hand2")
             btn_salir_sistema = tk.Button(self.windows_inicial, text="Salir del sistema", cursor="Hand2")
             btn_reportes = tk.Button(self.windows_inicial, text="Reportes Generales", cursor="Hand2")
         else:    
@@ -51,6 +53,7 @@ class PantallaInicial:
             btn_gestion_prestamos = tk.Button(self.windows_inicial, text="Gestionar Prestamos")
             btn_gestion_reservas = tk.Button(self.windows_inicial, text="Gestionar Reservas")
             btn_gestion_devoluciones = tk.Button(self.windows_inicial, text="Gestionar Devoluciones")
+            btn_gestion_remitos = tk.Button(self.windows_inicial, text="Gestionar Remitos y Envíos")
             btn_salir_sistema = tk.Button(self.windows_inicial, text="Salir del sistema")
             btn_reportes = tk.Button(self.windows_inicial, text="Reportes Generales")
                                         
@@ -72,6 +75,9 @@ class PantallaInicial:
         btn_gestion_devoluciones.config(fg="white", bg="orange", font=("Arial", 15, "bold"))
         btn_gestion_devoluciones.config(command=self.activar_ventana_gestion_prestamos)          
         
+        btn_gestion_remitos.config(fg="white", bg="teal", font=("Arial", 15, "bold"))
+        btn_gestion_remitos.config(command=self.activar_ventana_gestion_remitos)
+
         btn_salir_sistema.config(fg="white", bg="red", font=("Arial", 15, "bold"))
         btn_salir_sistema.config(command=self.salir_sistema)
         
@@ -93,6 +99,7 @@ class PantallaInicial:
         image_label.pack()       
         btn_salir_sistema.pack()
         btn_reportes.pack()
+        btn_gestion_remitos.pack()
         btn_gestion_sedes.pack(side="left")
         btn_gestion_socios.pack(side="right")
         btn_gestion_libros.pack(side="left")
@@ -111,6 +118,9 @@ class PantallaInicial:
     
     def activar_ventana_gestion_prestamos(self):
         PantallaGestionPrestamo()
+
+    def activar_ventana_gestion_remitos(self):
+        PantallaGestionRemito()
 
     def salir_sistema(self):
         self.windows_inicial.destroy()
