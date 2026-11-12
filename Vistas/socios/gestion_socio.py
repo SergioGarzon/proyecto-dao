@@ -5,6 +5,7 @@ from tkinter import messagebox
 import platform
 from Controlador.controlador_socio import ControladorSocio
 from Entidades.excepciones import ReglaNegocioError
+from Vistas.multas.gestion_multa import PantallaGestionMulta
 from Vistas.socios.insercion_socios import InsercionSocios
 
 class PantallaGestionSocio:
@@ -19,7 +20,7 @@ class PantallaGestionSocio:
     
     def windows_properties(self):
         self.windows_gestion_socio.title("Proyecto DAO")
-        self.windows_gestion_socio.geometry("1000x650")
+        self.windows_gestion_socio.geometry("1150x650")
         self.windows_gestion_socio.configure(bg="lightyellow")
         self.windows_gestion_socio.resizable(False, False)
         
@@ -92,10 +93,11 @@ class PantallaGestionSocio:
         cursor = "hand2" if str(platform.system()) == "Windows" else ""
         btn_modificar_socio = tk.Button(frame_4, text="Modificar socio", fg="white", bg="blue",
                                         font=("Arial", 15, "bold"), cursor=cursor, command=self.modificar_socio)
-        btn_habilitar_socio = tk.Button(frame_4, text="Habilitar", fg="white", bg="teal",
-                                        font=("Arial", 15, "bold"), cursor=cursor, command=self.habilitar_socio)
-        btn_inhabilitar_socio = tk.Button(frame_4, text="Inhabilitar", fg="white", bg="purple",
-                                          font=("Arial", 15, "bold"), cursor=cursor, command=self.inhabilitar_socio)
+        # Habilitar e inhabilitar no son botones: el sistema lo hace solo según multas y préstamos vencidos
+        btn_dar_alta_socio = tk.Button(frame_4, text="Dar de alta", fg="white", bg="teal",
+                                       font=("Arial", 15, "bold"), cursor=cursor, command=self.dar_alta_socio)
+        btn_ver_multas = tk.Button(frame_4, text="Ver multas", fg="white", bg="darkred",
+                                   font=("Arial", 15, "bold"), cursor=cursor, command=self.ver_multas)
                 
         frame_4.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         label_name_form.pack(pady=5)
@@ -104,9 +106,9 @@ class PantallaGestionSocio:
         btn_buscar_socio.pack(pady=5) 
         btn_actualizar.pack(pady=5)
         self.tabla.pack(fill=tk.BOTH, expand=True, pady=15)
+        btn_ver_multas.pack(pady=10, padx=4, side="right")
         btn_eliminar_socio.pack(pady=10, padx=4, side="right")
-        btn_inhabilitar_socio.pack(pady=10, padx=4, side="right")
-        btn_habilitar_socio.pack(pady=10, padx=4, side="right")
+        btn_dar_alta_socio.pack(pady=10, padx=4, side="right")
         btn_modificar_socio.pack(pady=10, padx=4, side="right")
         btn_insertar_datos_socios.pack(pady=10, padx=4, side="right")
         btn_cerrar.pack(side="left")
@@ -161,6 +163,12 @@ class PantallaGestionSocio:
             return None
         return self.tabla.item(seleccion[0], "values")[0]
 
+    # Metodo para ver y pagar las multas del socio seleccionado
+    def ver_multas(self):
+        legajo = self.legajo_seleccionado()
+        if legajo is not None:
+            PantallaGestionMulta(legajo=legajo)
+
     # Metodo para modificar los datos del socio seleccionado
     def modificar_socio(self):
         legajo = self.legajo_seleccionado()
@@ -173,12 +181,9 @@ class PantallaGestionSocio:
             return
         InsercionSocios(al_guardar=self.actualizar_tabla, datos=datos)
 
-    # Metodos para habilitar, inhabilitar y dar de baja: comparten la confirmación y el manejo de errores
-    def habilitar_socio(self):
-        self.cambiar_estado(self.controlador_socios.habilitar_socio, "habilitar", "habilitado")
-
-    def inhabilitar_socio(self):
-        self.cambiar_estado(self.controlador_socios.inhabilitar_socio, "inhabilitar", "inhabilitado")
+    # Metodos para dar de alta y de baja: comparten la confirmación y el manejo de errores
+    def dar_alta_socio(self):
+        self.cambiar_estado(self.controlador_socios.dar_alta_socio, "dar de alta", "dado de alta")
 
     def eliminar_socio(self):
         self.cambiar_estado(self.controlador_socios.eliminar_socio, "dar de baja", "dado de baja")

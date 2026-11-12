@@ -43,6 +43,13 @@ class ControladorPrestamo:
         with ConexionBD().obtener_session() as session:
             return [self._a_fila(prestamo) for prestamo in PrestamoDAO(session).buscar(campo, texto)]
 
+    def procesar_vencimientos(self, hoy=None):
+        """Inhabilita a los socios con préstamos vencidos. Devuelve cuántos socios cambiaron de estado."""
+        hoy = hoy or date.today()
+        with ConexionBD().obtener_session() as session:
+            socios = {prestamo.socio for prestamo in PrestamoDAO(session).listar_vencidos(hoy)}
+            return sum(socio.actualizar_habilitacion(hoy) for socio in socios)
+
     def consultar_encabezado(self, id_prestamo):
         with ConexionBD().obtener_session() as session:
             prestamo = self.obtener_prestamo(session, id_prestamo)
@@ -169,6 +176,8 @@ class ControladorPrestamo:
                                           prestamo.sede_origen, TipoRemito.RETORNO, ejemplares, hoy))
 
             prestamo.verificar_cierre()
+            # Las multas nuevas (o devolver un préstamo vencido) cambian la habilitación del socio
+            prestamo.socio.actualizar_habilitacion(hoy)
             return sum(multa.monto for multa in multas)  # Devuelve el total de multas generadas
 
     def _a_fila(self, prestamo):

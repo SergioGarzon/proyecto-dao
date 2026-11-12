@@ -19,6 +19,12 @@ class PrestamoDAO(BaseDAO):
     def listar_recientes(self):
         return self.session.query(Prestamo).order_by(Prestamo.id_prestamo.desc()).all()
 
+    def listar_vencidos(self, hoy):
+        return (self.session.query(Prestamo)
+                .filter(Prestamo.estado == EstadoPrestamo.ACTIVO, Prestamo.fecha_vencimiento < hoy)
+                .order_by(Prestamo.id_prestamo)
+                .all())
+
     def buscar(self, campo, texto):
         """Busca por un solo campo: numero, socio, libro, sede o estado."""
         texto = texto.strip()

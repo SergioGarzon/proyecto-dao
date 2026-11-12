@@ -113,12 +113,10 @@ def crear_socios(session, azar, hoy):
                             domicilio_calle=f"Calle {azar.randint(1, 200)} {azar.randint(100, 4000)}",
                             barrio=azar.choice(BARRIOS), localidad="Córdoba"))
 
-    # Unos pocos no pueden pedir préstamos, para probar esas validaciones
-    socios[0].estado = EstadoSocio.INHABILITADO
-    socios[1].estado = EstadoSocio.INHABILITADO
-    socios[2].estado = EstadoSocio.INHABILITADO
-    socios[3].estado = EstadoSocio.BAJA
-    socios[4].estado = EstadoSocio.BAJA
+    # Unos pocos están dados de baja, para probar esas validaciones.
+    # Los inhabilitados no se fijan acá: salen de las multas y los préstamos vencidos de la simulación
+    socios[0].estado = EstadoSocio.BAJA
+    socios[1].estado = EstadoSocio.BAJA
 
     session.add_all(socios)
     session.flush()
@@ -298,6 +296,10 @@ def cargar_datos_prueba(hoy=None, semilla=2026):
         socios = crear_socios(session, azar, hoy)
         Simulacion(session, azar, hoy, sedes, ejemplares, socios).ejecutar()
         crear_reservas(session, azar, hoy, sedes, libros, socios)
+
+        # La simulación genera multas y vencimientos: el estado de cada socio se calcula al final
+        for socio in socios:
+            socio.actualizar_habilitacion(hoy)
 
         session.flush()
         for entidad in (Sede, Socio, Libro, Ejemplar, Prestamo, Remito, Multa, Reserva):
