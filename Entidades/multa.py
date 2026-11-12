@@ -10,7 +10,7 @@ class Multa(Base):
     __tablename__ = "multas"
 
     MONTO_DIA = 100.0
-    MONTO_DANIO = 5000.0
+    MONTO_DANO = 5000.0
     MONTO_EXTRAVIO = 15000.0
 
     id_multa = Column(Integer, primary_key=True)
