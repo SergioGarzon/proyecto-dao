@@ -10,9 +10,11 @@
 import flet as ft
 
 class SaludoApp:
-    
-    def __init__(self):       
-         
+
+    def __init__(self, page):
+        # La página es la que tiene la ventana que se cierra con el botón
+        self.page = page
+
         self.saludo_sistema = ft.Text("Muchas gracias por utilizar nuestro sistema", size=50, data=0)
         self.grupo = ft.Text("Nuestro grupo estuvo compuesto por:", size=20, data=0)
         self.integrante_1 = ft.Text("* Dario Lopez", size=15, data=0)
@@ -28,6 +30,7 @@ class SaludoApp:
         # Link: https://flet.dev/docs/controls/button/        
         self.button_salir =  ft.Button(
                         content="Salir del Sistema",
+                        on_click=self.salir_programa,
                         style=ft.ButtonStyle(
                             color={
                                 ft.ControlState.HOVERED: ft.Colors.ORANGE_400,
@@ -83,12 +86,13 @@ class SaludoApp:
             self.button_salir         
         ], spacing=12, scroll=ft.ScrollMode.AUTO)
     
-    def salir_programa(self):        
-        pass
-        
-    
+    async def salir_programa(self, evento):
+        # En Flet 1.x cerrar la ventana es asíncrono: al cerrarse termina ft.run y el programa sale
+        await self.page.window.close()
+
+
 def main(page: ft.Page):
-    app = SaludoApp()
+    app = SaludoApp(page)
     page.title = "Informacion: Ventana de fin"
     page.window.width = 1200
     page.window.height = 650    

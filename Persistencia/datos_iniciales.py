@@ -1,7 +1,7 @@
 from datetime import date, time
 
-from Entidades import Ejemplar, Libro, Sede, Socio
-from Entidades.enums import EstadoSede, EstadoSocio
+from Entidades import Ejemplar, Libro, Prestamo, Sede, Socio
+from Entidades.enums import EstadoSede, TipoPrestamo
 from Persistencia.conexion import ConexionBD
 
 
@@ -25,8 +25,7 @@ def cargar_datos_iniciales():
             Socio(legajo_dni=12345, nombre="Federico", apellido="Wedemeyer", fecha_inscripcion=date(2026, 7, 9),
                   domicilio_calle="La Reserva", barrio="Cordoba", localidad="Córdoba"),
             Socio(legajo_dni=38999888, nombre="Martín", apellido="Ruiz", fecha_inscripcion=date(2025, 11, 2),
-                  domicilio_calle="Vélez Sarsfield 500", barrio="Nueva Córdoba", localidad="Córdoba",
-                  estado=EstadoSocio.INHABILITADO),
+                  domicilio_calle="Vélez Sarsfield 500", barrio="Nueva Córdoba", localidad="Córdoba"),
             Socio(legajo_dni=40111222, nombre="Lucía", apellido="Gómez", fecha_inscripcion=date(2026, 3, 10),
                   domicilio_calle="Colón 1200", barrio="Centro", localidad="Córdoba"),
         ]
@@ -37,6 +36,8 @@ def cargar_datos_iniciales():
                           editorial="Sur", anio_publicacion=1944)
         rayuela = Libro(isbn="9788437604572", titulo="Rayuela", autor="Julio Cortázar",
                         editorial="Sudamericana", anio_publicacion=1963)
+        el_tunel = Libro(isbn="9788432248221", titulo="El túnel", autor="Ernesto Sabato",
+                         editorial="Sur", anio_publicacion=1948)
 
         ejemplares = [
             Ejemplar(codigo_inventario="INV-0001", libro=cien_anios, sede=centro),
@@ -45,6 +46,18 @@ def cargar_datos_iniciales():
             Ejemplar(codigo_inventario="INV-0004", libro=ficciones, sede=norte),
             Ejemplar(codigo_inventario="INV-0005", libro=rayuela, sede=norte),
             Ejemplar(codigo_inventario="INV-0006", libro=rayuela, sede=norte),
+            Ejemplar(codigo_inventario="INV-0007", libro=el_tunel, sede=centro),
         ]
 
         session.add_all([centro, norte, sur] + socios + ejemplares)
+        session.flush()  # Asigna los ids que usan las validaciones del préstamo
+
+        # Martín tiene un préstamo vencido desde septiembre: por eso queda inhabilitado
+        martin = socios[1]
+        vencido = Prestamo(socio=martin, sede_origen=centro, sede_destino=centro, tipo=TipoPrestamo.LOCAL,
+                           fecha_prestamo=date(2026, 9, 1))
+        vencido.validar_sedes()
+        vencido.agregar_ejemplar(ejemplares[-1])
+        vencido.activar(vencido.fecha_prestamo)
+        session.add(vencido)
+        martin.actualizar_habilitacion(date(2026, 9, 20))

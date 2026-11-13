@@ -2,6 +2,7 @@ from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from Entidades.enums import EstadoEjemplar, EstadoFisico
+from Entidades.excepciones import ReglaNegocioError
 from Persistencia.conexion import Base
 
 
@@ -53,6 +54,20 @@ class Ejemplar(Base):
     def registrar_incidencia(self, fisico):
         self.estado_fisico = fisico
         self.estado = EstadoEjemplar.BAJA if fisico == EstadoFisico.EXTRAVIADO else EstadoEjemplar.EN_REPARACION
+
+    # Mantenimiento: decisiones del bibliotecario sobre ejemplares que no están circulando
+    def reparar(self):
+        if self.estado != EstadoEjemplar.EN_REPARACION:
+            raise ReglaNegocioError(
+                f"El ejemplar {self.codigo_inventario} no está en reparación (estado: {self.estado.value}).")
+        self.estado_fisico = EstadoFisico.REGULAR
+        self.estado = EstadoEjemplar.DISPONIBLE
+
+    def dar_baja(self):
+        if self.estado not in (EstadoEjemplar.DISPONIBLE, EstadoEjemplar.EN_REPARACION):
+            raise ReglaNegocioError(
+                f"No se puede dar de baja el ejemplar {self.codigo_inventario}: está {self.estado.value.lower()}.")
+        self.estado = EstadoEjemplar.BAJA
 
     def __str__(self):
         return f"{self.codigo_inventario}"

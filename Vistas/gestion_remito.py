@@ -67,16 +67,16 @@ class PantallaGestionRemito:
         self.tabla.heading("Sede_Destino", text="Sede Destino")
         self.tabla.heading("Fecha_Emision", text="Fecha Emisión")
         self.tabla.heading("Estado", text="Estado")
-        self.tabla.heading("Ejemplares", text="Ejemplares")
+        self.tabla.heading("Ejemplares", text="Códigos de inventario")
 
         self.tabla.column("Numero", width=110, anchor="center")
         self.tabla.column("Tipo", width=70, anchor="center")
         self.tabla.column("Prestamo", width=90, anchor="center")
-        self.tabla.column("Sede_Origen", width=220, anchor="center")
-        self.tabla.column("Sede_Destino", width=220, anchor="center")
+        self.tabla.column("Sede_Origen", width=200, anchor="center")
+        self.tabla.column("Sede_Destino", width=200, anchor="center")
         self.tabla.column("Fecha_Emision", width=110, anchor="center")
         self.tabla.column("Estado", width=110, anchor="center")
-        self.tabla.column("Ejemplares", width=160, anchor="center")
+        self.tabla.column("Ejemplares", width=200, anchor="center")
 
         # Traemos los datos de la base de datos
         self.actualizar_tabla()
@@ -94,6 +94,7 @@ class PantallaGestionRemito:
                    ("Recibido", "green", self.recibir),
                    ("Reportar daño", "purple", self.reportar_danio),
                    ("Reportar extravío", "brown", self.reportar_extravio),
+                   ("Cancelar envío", "red", self.cancelar_envio),
                    ("Ver historial", "gray", self.ver_historial)]
         for texto, color, comando in botones:
             self.crear_boton(frame_botones, texto, color, comando).pack(side="left", padx=5)
@@ -167,6 +168,17 @@ class PantallaGestionRemito:
 
     def reportar_extravio(self):
         self._ejecutar(self.controlador_remitos.reportar_extravio, "Extraviado")
+
+    def cancelar_envio(self):
+        seleccion = self.tabla.selection()
+        if seleccion:
+            numero = self.tabla.item(seleccion[0], "values")[0]
+            if not messagebox.askyesno("Confirmar cancelación",
+                                       f"¿Cancelar el envío del remito {numero}? El préstamo quedará cancelado "
+                                       "y los ejemplares vuelven a estar disponibles.",
+                                       parent=self.windows_gestion_remito):
+                return
+        self._ejecutar(self.controlador_remitos.cancelar, "Cancelado")
 
     def ver_historial(self):
         id_remito = self._remito_seleccionado()

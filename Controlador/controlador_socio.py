@@ -9,15 +9,29 @@ from Persistencia.socio_dao import SocioDAO
 
 class ControladorSocio:
 
-    def consultar_socios(self):
+    def consultar_socios(self, hoy=None):
+        hoy = hoy or date.today()
         with ConexionBD().obtener_session() as session:
-            return [self._a_fila(socio) for socio in SocioDAO(session).listar()]
+            self.sincronizar_habilitaciones(session, hoy)
+            return [self._a_fila(socio, hoy) for socio in SocioDAO(session).listar()]
 
-    def buscar_socio(self, legajo):
+    def buscar_socio(self, legajo, hoy=None):
+        hoy = hoy or date.today()
         legajo = self._convertir_legajo(legajo)
         with ConexionBD().obtener_session() as session:
             socio = SocioDAO(session).obtener(legajo)
-            return [self._a_fila(socio)] if socio else []
+            if socio is None:
+                return []
+            socio.actualizar_habilitacion(hoy)
+            return [self._a_fila(socio, hoy)]
+
+    @staticmethod
+    def sincronizar_habilitaciones(session, hoy):
+        """Pone al día el estado guardado de cada socio según sus multas y préstamos vencidos.
+
+        Así las pantallas y los combos nunca muestran un estado viejo. Devuelve cuántos cambiaron.
+        """
+        return sum(socio.actualizar_habilitacion(hoy) for socio in SocioDAO(session).listar())
 
     def obtener_socio(self, legajo):
         # Datos para precargar el formulario de edición
@@ -103,9 +117,9 @@ class ControladorSocio:
         except (TypeError, ValueError):
             raise ReglaNegocioError("El legajo debe ser un número.")
 
-    def _a_fila(self, socio):
+    def _a_fila(self, socio, hoy):
         # Si está inhabilitado se muestra el motivo, por ejemplo "Inhabilitado (multas sin pagar)"
-        motivo = socio.motivo_inhabilitacion(date.today()) if socio.estado == EstadoSocio.INHABILITADO else None
+        motivo = socio.motivo_inhabilitacion(hoy) if socio.estado == EstadoSocio.INHABILITADO else None
         estado = f"{socio.estado.value} ({motivo})" if motivo else socio.estado.value
         return (socio.legajo_dni, socio.nombre, socio.apellido, socio.fecha_inscripcion, socio.domicilio_calle,
                 socio.barrio, socio.localidad, estado)

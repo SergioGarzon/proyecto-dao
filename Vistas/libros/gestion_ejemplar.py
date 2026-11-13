@@ -130,14 +130,21 @@ class PantallaGestionEjemplar:
             row=0, column=3, padx=10, pady=10
         )
 
-        tk.Button(
-            frame,
-            text="Registrar ejemplar",
-            bg="green",
-            fg="white",
-            font=("Arial", 13, "bold"),
-            command=self.registrar_ejemplar
-        ).pack(pady=5)
+        # Acciones: registrar uno nuevo o actuar sobre el ejemplar seleccionado en la tabla
+        frame_botones = tk.Frame(frame, bg="lightyellow")
+        frame_botones.pack(pady=5)
+
+        for texto, color, comando in (("Registrar ejemplar", "green", self.registrar_ejemplar),
+                                      ("Marcar reparado", "blue", self.reparar_ejemplar),
+                                      ("Dar de baja", "orange", self.dar_baja_ejemplar)):
+            tk.Button(
+                frame_botones,
+                text=texto,
+                bg=color,
+                fg="white",
+                font=("Arial", 13, "bold"),
+                command=comando
+            ).pack(side="left", padx=5)
 
         tk.Button(
             frame,
@@ -255,3 +262,57 @@ class PantallaGestionEjemplar:
                 str(error),
                 parent=self.ventana
             )
+
+    def ejemplar_seleccionado(self):
+        seleccion = self.tabla.selection()
+        if not seleccion:
+            messagebox.showwarning(
+                "Sin selección",
+                "Seleccione un ejemplar de la tabla.",
+                parent=self.ventana
+            )
+            return None
+        valores = self.tabla.item(seleccion[0], "values")
+        # (id, código de inventario)
+        return valores[0], valores[1]
+
+    def reparar_ejemplar(self):
+        seleccionado = self.ejemplar_seleccionado()
+        if seleccionado is None:
+            return
+        id_ejemplar, codigo = seleccionado
+
+        try:
+            self.controlador.reparar_ejemplar(id_ejemplar)
+        except Exception as error:
+            messagebox.showerror("No se puede reparar", str(error), parent=self.ventana)
+            return
+
+        messagebox.showinfo(
+            "Ejemplar reparado",
+            f"El ejemplar {codigo} vuelve a circular. Si había reservas pendientes, se le asignó a la más antigua.",
+            parent=self.ventana
+        )
+        self.actualizar_tabla()
+
+    def dar_baja_ejemplar(self):
+        seleccionado = self.ejemplar_seleccionado()
+        if seleccionado is None:
+            return
+        id_ejemplar, codigo = seleccionado
+
+        if not messagebox.askyesno(
+            "Confirmar baja",
+            f"¿Dar de baja el ejemplar {codigo}? No se podrá volver a prestar.",
+            parent=self.ventana
+        ):
+            return
+
+        try:
+            self.controlador.dar_baja_ejemplar(id_ejemplar)
+        except Exception as error:
+            messagebox.showerror("No se puede dar de baja", str(error), parent=self.ventana)
+            return
+
+        messagebox.showinfo("Ejemplar dado de baja", f"El ejemplar {codigo} fue dado de baja.", parent=self.ventana)
+        self.actualizar_tabla()

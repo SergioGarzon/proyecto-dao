@@ -71,6 +71,9 @@ class Remito(Base):
     def reportar_extravio(self):
         self.estado_actual.reportar_extravio(self)
 
+    def cancelar(self):
+        self.estado_actual.cancelar(self)
+
     def registrar_incidencia(self, fisico):
         for ejemplar in self.ejemplares:
             ejemplar.registrar_incidencia(fisico)
