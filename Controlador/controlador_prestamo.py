@@ -1,5 +1,6 @@
 from datetime import date
 
+from Controlador.controlador_socio import ControladorSocio
 from Entidades.enums import EstadoFisico, TipoPrestamo, TipoRemito
 from Entidades.excepciones import ReglaNegocioError
 from Entidades.multa import Multa
@@ -55,8 +56,11 @@ class ControladorPrestamo:
             prestamo = self.obtener_prestamo(session, id_prestamo)
             return f"N° {prestamo.id_prestamo} - {prestamo.socio.apellido}, {prestamo.socio.nombre}"
 
-    def listar_socios_activos(self):
+    def listar_socios_activos(self, hoy=None):
+        hoy = hoy or date.today()
         with ConexionBD().obtener_session() as session:
+            # Primero se actualiza la habilitación: así el combo no ofrece socios con deuda ni oculta a los que pagaron
+            ControladorSocio.sincronizar_habilitaciones(session, hoy)
             return [(socio.legajo_dni, socio.nombre, socio.apellido)
                     for socio in SocioDAO(session).listar_habilitados()]
 

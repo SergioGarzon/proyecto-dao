@@ -35,6 +35,7 @@ class EstadoPrestamo(Enum):
     ACTIVO = "Activo"
     DEVUELTO = "Devuelto"
     CON_INCIDENCIA = "Con incidencia"
+    CANCELADO = "Cancelado"
 
 
 class EstadoReserva(Enum):

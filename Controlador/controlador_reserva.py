@@ -60,7 +60,7 @@ class ControladorReserva:
                               estado=EstadoReserva.PENDIENTE)
             reserva_dao.guardar(reserva)
             # Si hay un ejemplar libre, la reserva nueva lo toma enseguida (es la última en la fila)
-            self._asignar_pendientes(session, codigo_libro, id_sede, hoy)
+            self.asignar_pendientes(session, codigo_libro, id_sede, hoy)
             session.flush()
             return reserva.id_reserva, reserva.estado.value
 
@@ -72,7 +72,7 @@ class ControladorReserva:
             reserva.cancelar()
             if tenia_ejemplar:
                 # El ejemplar liberado pasa al siguiente socio que lo estaba esperando
-                self._asignar_pendientes(session, reserva.codigo_libro, reserva.id_sede_retiro, hoy)
+                self.asignar_pendientes(session, reserva.codigo_libro, reserva.id_sede_retiro, hoy)
 
     def cumplir_reserva(self, id_reserva, hoy=None):
         """El socio retira el ejemplar: la reserva se cumple y se registra un préstamo local."""
@@ -104,15 +104,15 @@ class ControladorReserva:
             asignadas = 0
             grupos = {(reserva.codigo_libro, reserva.id_sede_retiro) for reserva in reserva_dao.listar_pendientes()}
             for codigo_libro, id_sede in sorted(grupos):
-                asignadas += self._asignar_pendientes(session, codigo_libro, id_sede, hoy)
+                asignadas += self.asignar_pendientes(session, codigo_libro, id_sede, hoy)
             return len(vencidas), asignadas
 
     # Auxiliares
     def _vencer(self, session, reserva, hoy):
         reserva.vencer(hoy)
-        self._asignar_pendientes(session, reserva.codigo_libro, reserva.id_sede_retiro, hoy)
+        self.asignar_pendientes(session, reserva.codigo_libro, reserva.id_sede_retiro, hoy)
 
-    def _asignar_pendientes(self, session, codigo_libro, id_sede, hoy):
+    def asignar_pendientes(self, session, codigo_libro, id_sede, hoy):
         # Orden de llegada: cada ejemplar disponible va a la reserva pendiente más antigua
         pendientes = ReservaDAO(session).pendientes_por_libro_y_sede(codigo_libro, id_sede)
         disponibles = EjemplarDAO(session).disponibles_por_libro_y_sede(codigo_libro, id_sede)

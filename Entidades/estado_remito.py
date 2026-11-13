@@ -33,6 +33,9 @@ class EstadoRemito(ABC):
     def reportar_extravio(self, remito):
         self._rechazar("reportar extravío de")
 
+    def cancelar(self, remito):
+        self._rechazar("cancelar")
+
 
 class Preparado(EstadoRemito):
     nombre = "Preparado"
@@ -41,6 +44,11 @@ class Preparado(EstadoRemito):
         remito.sede_origen.validar_activa()
         remito.sede_destino.validar_activa()
         remito.cambiar_estado(Despachado())
+
+    def cancelar(self, remito):
+        if remito.tipo == TipoRemito.RETORNO:
+            raise ReglaNegocioError("Un remito de retorno no se puede cancelar: el material tiene que volver.")
+        remito.cambiar_estado(Cancelado())
 
 
 class Despachado(EstadoRemito):
@@ -96,8 +104,19 @@ class Extraviado(EstadoRemito):
         remito.registrar_incidencia(EstadoFisico.EXTRAVIADO)
 
 
+class Cancelado(EstadoRemito):
+    """El envío no llegó a salir: los ejemplares vuelven a estar disponibles y el préstamo se cancela."""
+    nombre = "Cancelado"
+
+    def entrar(self, remito):
+        for ejemplar in remito.ejemplares:
+            ejemplar.finalizar_retorno()
+        remito.prestamo.cancelar()
+
+
 ESTADOS_REMITO = {estado.nombre: estado for estado in
-                  (Preparado, Despachado, EnTransito, Recibido, Danado, Extraviado)}
+                  (Preparado, Despachado, EnTransito, Recibido, Danado, Extraviado, Cancelado)}
 
 ESTADOS_ABIERTOS = (Preparado.nombre, Despachado.nombre, EnTransito.nombre)
+# Remitos que terminaron un recorrido real. Cancelado queda afuera: nunca salió, no cuenta en la tasa de envíos
 ESTADOS_FINALES = (Recibido.nombre, Danado.nombre, Extraviado.nombre)

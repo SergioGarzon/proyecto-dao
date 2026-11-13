@@ -69,6 +69,13 @@ class Prestamo(Base):
     def marcar_incidencia(self):
         self.estado = EstadoPrestamo.CON_INCIDENCIA
 
+    def cancelar(self):
+        # Solo antes de que el material salga: después ya hay un envío en curso
+        if self.estado != EstadoPrestamo.PENDIENTE_ENVIO:
+            raise ReglaNegocioError(
+                f"El préstamo {self.id_prestamo} no se puede cancelar: está {self.estado.value.lower()}.")
+        self.estado = EstadoPrestamo.CANCELADO
+
     def validar_activo(self):
         if self.estado != EstadoPrestamo.ACTIVO:
             raise ReglaNegocioError(f"El préstamo {self.id_prestamo} no está activo.")

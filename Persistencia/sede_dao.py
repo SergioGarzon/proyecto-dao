@@ -57,10 +57,12 @@ class SedeDAO(BaseDAO):
         prestamos = (self.session.query(Prestamo.id_prestamo)
                      .filter(or_(Prestamo.id_sede_origen == id_sede,
                                  Prestamo.id_sede_destino == id_sede),
-                             Prestamo.estado != EstadoPrestamo.DEVUELTO)
+                             # Devuelto, con incidencia y cancelado son estados finales
+                             Prestamo.estado.in_((EstadoPrestamo.PENDIENTE_ENVIO,
+                                                  EstadoPrestamo.ACTIVO)))
                      .first())
         if prestamos:
-            return 'Tiene préstamos sin cerrar (activos, pendientes o con incidencia).'
+            return 'Tiene préstamos sin cerrar (pendientes de envío o activos).'
 
         remitos = (self.session.query(Remito.id_remito)
                    .filter(or_(Remito.id_sede_origen == id_sede,

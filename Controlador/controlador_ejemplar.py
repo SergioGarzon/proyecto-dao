@@ -1,4 +1,6 @@
+from datetime import date
 
+from Controlador.controlador_reserva import ControladorReserva
 from Entidades.ejemplar import Ejemplar
 from Entidades.enums import EstadoEjemplar, EstadoFisico
 from Entidades.excepciones import ReglaNegocioError
@@ -118,3 +120,28 @@ class ControladorEjemplar:
             session.flush()
 
             return nuevo_ejemplar.id_ejemplar
+
+    # Marcar como reparado un ejemplar que estaba en reparación
+    def reparar_ejemplar(self, id_ejemplar, hoy=None):
+        hoy = hoy or date.today()
+        with ConexionBD().obtener_session() as session:
+            ejemplar = self._obtener(session, id_ejemplar)
+            ejemplar.reparar()
+            # Vuelve a circular: si alguien lo estaba esperando, la reserva más antigua lo recibe
+            ControladorReserva().asignar_pendientes(session, ejemplar.codigo_libro, ejemplar.id_sede, hoy)
+            return ejemplar.estado.value
+
+    # Baja definitiva (por ejemplo, un ejemplar que no se puede reparar)
+    def dar_baja_ejemplar(self, id_ejemplar):
+        with ConexionBD().obtener_session() as session:
+            self._obtener(session, id_ejemplar).dar_baja()
+
+    def _obtener(self, session, id_ejemplar):
+        try:
+            id_ejemplar = int(id_ejemplar)
+        except (ValueError, TypeError):
+            raise ReglaNegocioError("Debe seleccionar un ejemplar válido.")
+        ejemplar = EjemplarDAO(session).obtener(id_ejemplar)
+        if ejemplar is None:
+            raise ReglaNegocioError(f"No se encontró el ejemplar {id_ejemplar}.")
+        return ejemplar
